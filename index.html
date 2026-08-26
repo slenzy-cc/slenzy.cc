@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slenzy.cc — Cyber Intelligence</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#050607;color:#d9ffe9;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(0,255,136,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.025) 1px,transparent 1px);background-size:32px 32px}
+header{padding:24px 7%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #123526;position:relative}
+.logo{font-size:24px;font-weight:900;letter-spacing:3px;color:#00ff88;text-shadow:0 0 18px #00ff8866}
+nav a{color:#8bb9a2;text-decoration:none;margin-left:24px;font-size:13px}
+nav a:hover{color:#00ff88}
+.hero{max-width:1100px;margin:90px auto 50px;padding:0 25px;text-align:center}
+.badge{display:inline-block;border:1px solid #145b3b;border-radius:999px;padding:7px 13px;color:#55d995;font-size:12px;background:#07140e}
+h1{font-size:clamp(42px,8vw,82px);margin:20px 0 10px;letter-spacing:-4px}
+.green{color:#00ff88}
+.sub{color:#719683;max-width:650px;margin:auto;line-height:1.7}
+.search{margin:35px auto 0;max-width:760px;display:flex;background:#090d0b;border:1px solid #185438;border-radius:10px;padding:7px;box-shadow:0 0 35px #00ff8810}
+.search input{flex:1;background:transparent;border:0;outline:0;color:#d9ffe9;padding:15px;font:inherit}
+button{border:0;border-radius:7px;background:#00ff88;color:#00170c;padding:0 24px;font-weight:800;cursor:pointer}
+.container{max-width:1100px;margin:0 auto;padding:20px 25px 80px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.card{background:#090d0b;border:1px solid #123526;border-radius:12px;padding:22px;transition:.2s}
+.card:hover{border-color:#00a95a;transform:translateY(-3px)}
+.icon{color:#00ff88;font-size:22px}
+.card h3{margin:14px 0 8px}
+.card p{color:#6e8f7d;font-size:13px;line-height:1.6}
+.terminal{margin-top:15px;background:#030504;border:1px solid #123526;border-radius:12px;padding:20px;box-shadow:inset 0 0 30px #00ff8808}
+.termline{margin:7px 0;color:#7ba991;font-size:13px}.prompt{color:#00ff88}
+footer{text-align:center;padding:25px;border-top:1px solid #123526;color:#527061;font-size:12px}
+@media(max-width:700px){nav{display:none}.grid{grid-template-columns:1fr}.search{height:58px}.search button{padding:0 14px}h1{letter-spacing:-2px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">SLENZY.CC</div>
+  <nav><a href="#tools">TOOLS</a><a href="#terminal">TERMINAL</a><a href="#status">STATUS</a></nav>
+</header>
+
+<section class="hero">
+  <span class="badge">● SYSTEM ONLINE</span>
+  <h1>CYBER <span class="green">INTELLIGENCE</span></h1>
+  <p class="sub">Slenzy.cc — güvenlik araştırmaları ve açık kaynak istihbarat için modern, terminal esintili bir arayüz.</p>
+  <div class="search">
+    <input id="target" placeholder="Domain veya IP yaz...">
+    <button onclick="runSearch()">SEARCH</button>
+  </div>
+</section>
+
+<main class="container">
+<section id="tools">
+  <div class="grid">
+    <div class="card"><div class="icon">⌁</div><h3>DOMAIN</h3><p>Domain bilgilerini incelemek için araştırma arayüzü.</p></div>
+    <div class="card"><div class="icon">◈</div><h3>DNS</h3><p>DNS kayıtlarını görüntülemeye yönelik araç alanı.</p></div>
+    <div class="card"><div class="icon">⌖</div><h3>IP INFO</h3><p>IP adresleri hakkında genel teknik bilgiler için alan.</p></div>
+  </div>
+</section>
+
+<section id="terminal" class="terminal">
+  <div class="termline"><span class="prompt">slenzy@cc:~$</span> system --status</div>
+  <div class="termline">[+] Core ................. ONLINE</div>
+  <div class="termline">[+] Web Interface ........ ONLINE</div>
+  <div class="termline">[+] Research Tools ....... READY</div>
+  <div class="termline"><span class="prompt">slenzy@cc:~$</span> <span id="output">awaiting input_</span></div>
+</section>
+</main>
+
+<footer id="status">SLENZY.CC // CYBER RESEARCH INTERFACE</footer>
+
+<script>
+function runSearch(){
+  const value=document.getElementById("target").value.trim();
+  const out=document.getElementById("output");
+  out.textContent=value ? "query queued: "+value : "please enter a domain or IP_";
+}
+</script>
+</body>
+</html>
