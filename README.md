@@ -1,2 +1,2 @@
 # slenzy.cc
-siber güvenlik sitesi
+siber güvenlik sitesi :)

@@ -70,11 +70,55 @@ footer{text-align:center;padding:25px;border-top:1px solid #123526;color:#527061
 <footer id="status">SLENZY.CC // CYBER RESEARCH INTERFACE</footer>
 
 <script>
-function runSearch(){
-  const value=document.getElementById("target").value.trim();
-  const out=document.getElementById("output");
-  out.textContent=value ? "query queued: "+value : "please enter a domain or IP_";
+async function runSearch() {
+  const input = document.getElementById("target").value.trim();
+  const out = document.getElementById("output");
+
+  if (!input) {
+    out.style.color = "#ff4d4d";
+    out.textContent = "Lütfen geçerli bir IP veya Domain girin_";
+    return;
+  }
+
+  out.style.color = "#00ff88";
+  out.innerHTML = `Sorgulanıyor: <span style="color:#fff">${input}</span>... Lütfen bekleyin.`;
+
+  try {
+    const response = await fetch(`https://ipapi.co/${input}/json/`);
+    
+    if (!response.ok) {
+      throw new Error("Veri alınamadı");
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      out.style.color = "#ff4d4d";
+      out.textContent = `Hata: ${data.reason || "Geçersiz IP/Domain adresi."}`;
+      return;
+    }
+
+    out.innerHTML = `
+      <br>----------------------------------------<br>
+      [+] Hedef       : <span style="color:#fff">${data.ip || input}</span><br>
+      [+] Ülke        : ${data.country_name || 'Bilinmiyor'} (${data.country_code || '-'})<br>
+      [+] Şehir       : ${data.city || 'Bilinmiyor'} / ${data.region || '-'}<br>
+      [+] ISP / Org   : ${data.org || 'Bilinmiyor'}<br>
+      [+] ASN         : ${data.asn || 'Bilinmiyor'}<br>
+      [+] Enlem/Boylam: ${data.latitude}, ${data.longitude}<br>
+      ----------------------------------------
+    `;
+  } catch (error) {
+    out.style.color = "#ff4d4d";
+    out.textContent = "Sorgulama sırasında bir ağ hatası oluştu veya API sınırına ulaşıldı.";
+  }
 }
+
+document.getElementById("target").addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    runSearch();
+  }
+});
 </script>
 </body>
 </html>
