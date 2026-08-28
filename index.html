@@ -15,12 +15,10 @@
             --bg: #030816;
             --card-bg: #0d1b3e;
             --card-border: #1d3557;
-            --blue-glow: #1d4ed8;
             --blue-btn: #1d4ed8;
             --sari: #fbc02d;
             --sari-bright: #ffeb3b;
             --text-dim: #88a0c0;
-            --text-light: #e2e8f0;
         }
 
         * {
@@ -101,16 +99,21 @@
             cursor: pointer;
         }
 
-        .btn-admin {
-            background: #b91c1c;
+        .btn-menu {
+            background: #0f172a;
             color: #fff;
-            border: 1px solid #ef4444;
+            border: 1px solid #334155;
             padding: 8px 16px;
             border-radius: 6px;
             font-weight: bold;
             font-size: 0.85rem;
             cursor: pointer;
-            display: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-menu:hover {
+            border-color: var(--sari-bright);
+            color: var(--sari-bright);
         }
 
         /* GÜNLÜK HAK BARI */
@@ -248,7 +251,7 @@
             white-space: pre-wrap;
         }
 
-        /* ADMİN PANELİ MODAL/BOX */
+        /* ADMİN PANELİ */
         #admin-panel {
             display: none;
             background: var(--card-bg);
@@ -256,8 +259,6 @@
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(251, 192, 45, 0.25);
-            width: 100%;
         }
 
         table {
@@ -284,8 +285,15 @@
         </div>
         <div class="header-btns">
             <button class="btn-vip">👑 VIP / PREMIUM</button>
-            <button id="admin-panel-btn" class="btn-admin" onclick="adminPanelToggle()">🛠️ ADMİN PANELİ</button>
+            
+            <!-- Giriş Yapınca Adın ve Profil Fotoğrafın Burada Belirecek -->
+            <div id="user-profile" style="display: none; align-items: center; gap: 8px; color: var(--sari-bright); font-weight: bold; font-size: 0.9rem; background: rgba(15, 23, 42, 0.6); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--card-border);">
+                <img id="user-avatar" src="" style="width: 24px; height: 24px; border-radius: 50%; display: none;">
+                <span id="user-name">Reis</span>
+            </div>
+
             <button id="auth-btn" class="btn-auth" onclick="toggleAuth()">GİRİŞ YAP</button>
+            <button id="menu-btn" class="btn-menu" onclick="toggleMenu()">MENÜ ☰</button>
         </div>
     </header>
 
@@ -335,7 +343,6 @@
             <div class="title" id="card-4-title">HARİTA KONUMU</div>
             <div class="value" id="card-4-val">-</div>
         </div>
-        <pre id="res-port">Sonuçlar burada görüntülenecek...</pre>
     </div>
 
     <!-- KONSOL ÇIKTISI -->
@@ -343,7 +350,6 @@
 </div>
 
 <script>
-    // Firebase Konfigürasyonu
     const firebaseConfig = {
         apiKey: "AIzaSyB-MaZC3_cPmBqytu5L4EMzmYGvxLFWBiK",
         authDomain: "slenzy-osint.firebaseapp.com",
@@ -366,10 +372,20 @@
 
     auth.onAuthStateChanged(async (user) => {
         const authBtn = document.getElementById('auth-btn');
-        const adminPanelBtn = document.getElementById('admin-panel-btn');
+        const userProfile = document.getElementById('user-profile');
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
 
         if (user) {
             authBtn.innerText = 'ÇIKIŞ YAP';
+            
+            userProfile.style.display = 'flex';
+            userName.innerText = user.displayName || 'Kullanıcı';
+            
+            if (user.photoURL) {
+                userAvatar.src = user.photoURL;
+                userAvatar.style.display = 'block';
+            }
 
             const userRef = db.collection('users').doc(user.uid);
             const doc = await userRef.get();
@@ -387,19 +403,15 @@
 
             const userData = (await userRef.get()).data();
             if (userData?.role === 'admin' || user.email === ADMIN_EMAIL) {
-                adminPanelBtn.style.display = 'inline-block';
                 kullanicilariGetir();
-            } else {
-                adminPanelBtn.style.display = 'none';
             }
         } else {
             authBtn.innerText = 'GİRİŞ YAP';
-            adminPanelBtn.style.display = 'none';
+            userProfile.style.display = 'none';
             document.getElementById('admin-panel').style.display = 'none';
         }
     });
 
-    // Giriş / Çıkış Fonksiyonu
     function toggleAuth() {
         if (auth.currentUser) {
             auth.signOut().then(() => location.reload());
@@ -409,9 +421,13 @@
         }
     }
 
-    function adminPanelToggle() {
-        const p = document.getElementById('admin-panel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    function toggleMenu() {
+        if (auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
+            const p = document.getElementById('admin-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        } else {
+            alert("Menü paneli yakında aktif olacaktır.");
+        }
     }
 
     async function kullanicilariGetir() {
@@ -468,7 +484,6 @@
         }
     }
 
-    // SEKMELER ARASI GEÇİŞ
     function tabDegistir(type, btn) {
         activeTab = type;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -505,42 +520,32 @@
         document.getElementById('card-4-val').innerText = "-";
     }
 
-    // SORGU FONKSİYONU
     async function sorgula() {
         const val = document.getElementById('target-input').value.trim();
         const consoleBox = document.getElementById('console-output');
 
-        if (!val) {
-            alert("Lütfen bir hedef girin!");
-            return;
-        }
+        if (!val) return alert("Lütfen bir hedef girin!");
 
         if (usedCount >= dailyLimit) {
-            alert("Günlük ücretsiz sorgulama limitinize ulaştınız!");
-            return;
+            return alert("Günlük ücretsiz sorgulama limitinize ulaştınız!");
         }
-    }
 
         usedCount++;
         document.getElementById('usage-text').innerText = `${usedCount} / ${dailyLimit}`;
-
         consoleBox.innerText = `> Sorgulama başlatıldı: [${val}]...\n> Lütfen bekleyin...`;
 
         if (activeTab === 'ip') {
             try {
                 const res = await fetch(`https://ipwhois.app/json/${val}`);
                 const data = await res.json();
-                if (!data.success) {
-                    consoleBox.innerText = `> Hata: ${data.message}`;
-                    return;
-                }
+                if (!data.success) return consoleBox.innerText = `> Hata: ${data.message}`;
 
                 document.getElementById('card-1-val').innerText = data.ip;
                 document.getElementById('card-2-val').innerText = `${data.city}, ${data.country}`;
                 document.getElementById('card-3-val').innerText = data.isp;
                 document.getElementById('card-4-val').innerText = `${data.latitude}, ${data.longitude}`;
 
-                consoleBox.innerText = `> [BAŞARILI] IP Bilgileri başarıyla çekildi.\n> Ülke Kodu: ${data.country_code}\n> Org: ${data.org}\n> Zaman Dilimi: ${data.timezone}`;
+                consoleBox.innerText = `> [BAŞARILI] IP Bilgileri çekildi.\n> Ülke Kodu: ${data.country_code}\n> Org: ${data.org}\n> Zaman Dilimi: ${data.timezone}`;
             } catch (e) {
                 consoleBox.innerText = `> Bağlantı hatası oluştu!`;
             }
@@ -573,7 +578,7 @@
                 consoleBox.innerText = `> E-posta sorgu hatası!`;
             }
         } else {
-            consoleBox.innerText = `> Bu modül için tarama simüle ediliyor...\n> Hedef: ${val}\n> Durum: Aktif`;
+            consoleBox.innerText = `> Simülasyon modu aktif.\n> Hedef: ${val}`;
         }
     }
 </script>
