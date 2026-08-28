@@ -3,258 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLENZY OSINT v5.0</title>
+    <title>SLENZY // OSINT DASHBOARD v6.0 (ADMIN)</title>
 
-    <!-- Firebase SDK Compat -->
+    <!-- Firebase SDK Compat Kütüphaneleri -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
-            --bg: #030816;
-            --card-bg: #0d1b3e;
-            --card-border: #1d3557;
-            --blue-btn: #1d4ed8;
+            --bg: #020617;
+            --panel-bg: rgba(15, 23, 42, 0.95);
+            --border: #1e293b;
             --sari: #fbc02d;
-            --sari-bright: #ffeb3b;
-            --text-dim: #88a0c0;
-        }
-
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
         }
 
         body {
             background-color: var(--bg);
-            color: #fff;
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            min-height: 100vh;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
-        /* HEADER */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 20px;
-            background: rgba(13, 27, 62, 0.4);
-            border: 1px solid rgba(251, 192, 45, 0.3);
+            padding: 15px 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
             border-radius: 8px;
             margin-bottom: 20px;
         }
 
-        .logo {
-            color: var(--sari-bright);
-            font-weight: 900;
-            font-size: 1.3rem;
-            letter-spacing: 1.5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .dot {
-            height: 10px;
-            width: 10px;
-            background-color: var(--sari-bright);
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px var(--sari-bright);
-        }
-
-        .header-btns {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .btn-vip {
-            background: var(--sari-bright);
-            color: #000;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(255, 235, 59, 0.4);
-        }
-
-        .btn-auth {
+        .btn {
             background: #1e293b;
-            color: var(--sari-bright);
-            border: 1px solid var(--sari);
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        .btn-menu {
-            background: #0f172a;
             color: #fff;
             border: 1px solid #334155;
             padding: 8px 16px;
             border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.85rem;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-menu:hover {
-            border-color: var(--sari-bright);
-            color: var(--sari-bright);
-        }
-
-        /* GÜNLÜK HAK BARI */
-        .usage-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(13, 27, 62, 0.3);
-            padding: 10px 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-            color: var(--text-dim);
             font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-
-        .usage-count {
-            color: var(--sari-bright);
-            font-size: 1.1rem;
-        }
-
-        /* SEKMELER */
-        .tab-menu {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            color: #fff;
-            font-weight: bold;
-            text-align: center;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-
-        .tab-btn.active {
-            border-color: #3b82f6;
-            box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
-            background: #0f2b66;
-        }
-
-        /* SORGU ALANI */
-        .search-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .input-box {
-            flex: 1;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-box input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 1rem;
-            outline: none;
-            font-family: monospace;
-        }
-
-        .btn-sorgula {
-            width: 120px;
-            background: var(--blue-btn);
-            color: #fff;
-            border: 1px solid #3b82f6;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(29, 78, 216, 0.6);
             transition: 0.2s;
         }
 
-        .btn-sorgula:hover {
-            background: #2563eb;
+        .btn:hover {
+            background: #334155;
         }
 
-        /* BİLGİ KARTLARI GRID */
-        .info-grid {
+        .btn-admin {
+            background: #b91c1c;
+            display: none;
+        }
+
+        .btn-admin:hover {
+            background: #dc2626;
+        }
+
+        .grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        .info-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            padding: 20px;
             border-radius: 8px;
-            padding: 15px;
-            min-height: 80px;
         }
 
-        .info-card .title {
-            color: #38bdf8;
-            font-size: 0.8rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .info-card .value {
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #0f172a;
+            border: 1px solid var(--border);
             color: #fff;
-            font-size: 1rem;
-            font-family: monospace;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
         }
 
-        /* ALT KONSOL/LOG */
-        .console-box {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 15px;
-            min-height: 120px;
+        pre {
+            background: #090d16;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
             color: #38bdf8;
-            font-family: monospace;
-            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
             white-space: pre-wrap;
         }
 
-        /* ADMİN PANELİ */
         #admin-panel {
             display: none;
-            background: var(--card-bg);
+            background: var(--panel-bg);
             border: 1px solid var(--sari);
             padding: 20px;
             border-radius: 8px;
@@ -269,87 +120,55 @@
 
         th, td {
             padding: 10px;
-            border-bottom: 1px solid var(--card-border);
+            border-bottom: 1px solid var(--border);
             text-align: left;
         }
-
-        th { color: var(--sari-bright); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <div class="logo">
-            <span class="dot"></span> SLENZY OSINT v5.0
-        </div>
-        <div class="header-btns">
-            <button class="btn-vip">👑 VIP / PREMIUM</button>
-            
-            <!-- Giriş Yapınca Adın ve Profil Fotoğrafın Burada Belirecek -->
-            <div id="user-profile" style="display: none; align-items: center; gap: 8px; color: var(--sari-bright); font-weight: bold; font-size: 0.9rem; background: rgba(15, 23, 42, 0.6); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--card-border);">
-                <img id="user-avatar" src="" style="width: 24px; height: 24px; border-radius: 50%; display: none;">
-                <span id="user-name">Reis</span>
-            </div>
-
-            <button id="auth-btn" class="btn-auth" onclick="toggleAuth()">GİRİŞ YAP</button>
-            <button id="menu-btn" class="btn-menu" onclick="toggleMenu()">MENÜ ☰</button>
+        <h2>SLENZY // OSINT DASHBOARD</h2>
+        <div>
+            <button id="admin-panel-btn" class="btn btn-admin" onclick="adminPanelToggle()">🛠️ ADMİN PANELİ</button>
+            <button id="auth-btn" class="btn" onclick="toggleAuth()">GİRİŞ YAP</button>
         </div>
     </header>
 
-    <!-- ADMIN PANELİ -->
+    <!-- KULLANICI & ROL YÖNETİMİ (Sadece Admin Görür) -->
     <div id="admin-panel">
-        <h3 style="color: var(--sari-bright); margin-top:0;">👥 Üye & Rol Yönetim Paneli</h3>
-        <div id="user-list-container">Kullanıcılar yükleniyor...</div>
+        <h3 style="color: var(--sari); margin-top: 0;">👥 Üye & Rol Yönetim Paneli</h3>
+        <div id="user-list-container">Kullanıcı verileri yükleniyor...</div>
     </div>
 
-    <!-- GÜNLÜK HAK BARI -->
-    <div class="usage-bar">
-        <span>GÜNLÜK ÜCRETSİZ SORGULAMA HAKKI:</span>
-        <span class="usage-count" id="usage-text">0 / 30</span>
-    </div>
+    <!-- OSINT SORGU ARAÇLARI -->
+    <div class="grid">
+        <div class="card">
+            <h3>🌐 Hızlı IP & Site Sorgu</h3>
+            <input type="text" id="target-site" placeholder="Örn: google.com veya IP">
+            <button class="btn" onclick="siteSorgula()">Sorgula</button>
+            <pre id="res-site">Sonuç bekleniyor...</pre>
+        </div>
 
-    <!-- SEKMELER -->
-    <div class="tab-menu">
-        <div class="tab-btn active" onclick="tabDegistir('ip', this)">🌐 IP KONUMU</div>
-        <div class="tab-btn" onclick="tabDegistir('port', this)">⚡ AÇIK PORTLAR</div>
-        <div class="tab-btn" onclick="tabDegistir('subdomain', this)">🔍 ALT SİTELER</div>
-        <div class="tab-btn" onclick="tabDegistir('leak', this)">⚠️ SIZINTI KONTROLÜ</div>
-    </div>
+        <div class="card">
+            <h3>⚡ Hızlı Port Taraması</h3>
+            <input type="text" id="target-port" placeholder="Örn: 8.8.8.8">
+            <button class="btn" onclick="portSorgula()">Açık Portları Tara</button>
+            <pre id="res-port">Sonuç bekleniyor...</pre>
+        </div>
 
-    <!-- SORGU GİRDİ ALANI -->
-    <div class="search-container">
-        <div class="input-box">
-            <input type="text" id="target-input" placeholder="[+] IP Adresi Girin (Örn: 8.8.8.8)">
-        </div>
-        <button class="btn-sorgula" onclick="sorgula()">SORGULA</button>
-    </div>
-
-    <!-- BİLGİ KARTLARI -->
-    <div class="info-grid">
-        <div class="info-card">
-            <div class="title" id="card-1-title">HEDEF IP</div>
-            <div class="value" id="card-1-val">-</div>
-        </div>
-        <div class="info-card">
-            <div class="title" id="card-2-title">ŞEHİR / ÜLKE</div>
-            <div class="value" id="card-2-val">-</div>
-        </div>
-        <div class="info-card">
-            <div class="title" id="card-3-title">İNTERNET SAĞLAYICI</div>
-            <div class="value" id="card-3-val">-</div>
-        </div>
-        <div class="info-card">
-            <div class="title" id="card-4-title">HARİTA KONUMU</div>
-            <div class="value" id="card-4-val">-</div>
+        <div class="card">
+            <h3>📧 E-posta / Gmail Sorgu</h3>
+            <input type="text" id="target-email" placeholder="Örn: ornek@gmail.com">
+            <button class="btn" onclick="emailSorgula()">Sorgula</button>
+            <pre id="res-email">Sonuç bekleniyor...</pre>
         </div>
     </div>
-
-    <!-- KONSOL ÇIKTISI -->
-    <div class="console-box" id="console-output">> Sistem aktif. Sorgulama yapmak için yukarıdaki alana bir hedef girin...</div>
 </div>
 
 <script>
+    // Firebase Konfigürasyonu
     const firebaseConfig = {
         apiKey: "AIzaSyB-MaZC3_cPmBqytu5L4EMzmYGvxLFWBiK",
         authDomain: "slenzy-osint.firebaseapp.com",
@@ -362,31 +181,20 @@
 
     const ADMIN_EMAIL = "mericegecan37@gmail.com";
 
+    // Firebase Başlatma
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let activeTab = 'ip';
-    let dailyLimit = 30;
-    let usedCount = 0;
-
+    // Oturum Durumu Takibi
     auth.onAuthStateChanged(async (user) => {
         const authBtn = document.getElementById('auth-btn');
-        const userProfile = document.getElementById('user-profile');
-        const userName = document.getElementById('user-name');
-        const userAvatar = document.getElementById('user-avatar');
+        const adminPanelBtn = document.getElementById('admin-panel-btn');
 
         if (user) {
             authBtn.innerText = 'ÇIKIŞ YAP';
-            
-            userProfile.style.display = 'flex';
-            userName.innerText = user.displayName || 'Kullanıcı';
-            
-            if (user.photoURL) {
-                userAvatar.src = user.photoURL;
-                userAvatar.style.display = 'block';
-            }
 
+            // Veritabanına Kullanıcı Kaydet/Güncelle
             const userRef = db.collection('users').doc(user.uid);
             const doc = await userRef.get();
 
@@ -394,24 +202,33 @@
                 await userRef.set({
                     uid: user.uid,
                     email: user.email,
-                    displayName: user.displayName || 'İsimsiz',
+                    displayName: user.displayName || 'İsimsiz Kullanıcı',
                     photoURL: user.photoURL || '',
                     role: user.email === ADMIN_EMAIL ? 'admin' : 'user',
                     lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                 });
+            } else {
+                await userRef.update({
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
             }
 
+            // Rol Yetki Kontrolü
             const userData = (await userRef.get()).data();
             if (userData?.role === 'admin' || user.email === ADMIN_EMAIL) {
+                adminPanelBtn.style.display = 'inline-block';
                 kullanicilariGetir();
+            } else {
+                adminPanelBtn.style.display = 'none';
             }
         } else {
             authBtn.innerText = 'GİRİŞ YAP';
-            userProfile.style.display = 'none';
+            adminPanelBtn.style.display = 'none';
             document.getElementById('admin-panel').style.display = 'none';
         }
     });
 
+    // Giriş / Çıkış Fonksiyonu
     function toggleAuth() {
         if (auth.currentUser) {
             auth.signOut().then(() => location.reload());
@@ -421,15 +238,13 @@
         }
     }
 
-    function toggleMenu() {
-        if (auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
-            const p = document.getElementById('admin-panel');
-            p.style.display = p.style.display === 'block' ? 'none' : 'block';
-        } else {
-            alert("Menü paneli yakında aktif olacaktır.");
-        }
+    // Admin Paneli Aç/Kapat
+    function adminPanelToggle() {
+        const p = document.getElementById('admin-panel');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
+    // Kullanıcıları Listeleme (Admin)
     async function kullanicilariGetir() {
         const listContainer = document.getElementById('user-list-container');
         const snapshot = await db.collection('users').get();
@@ -474,6 +289,7 @@
         listContainer.innerHTML = html;
     }
 
+    // Rol Değiştirme
     async function rolDegistir(uid, yeniRol) {
         try {
             await db.collection('users').doc(uid).update({ role: yeniRol });
@@ -484,101 +300,52 @@
         }
     }
 
-    function tabDegistir(type, btn) {
-        activeTab = type;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    // --- HIZLI OSINT SORGU FONKSİYONLARI ---
 
-        const input = document.getElementById('target-input');
-        if (type === 'ip') {
-            input.placeholder = "[+] IP Adresi Girin (Örn: 8.8.8.8)";
-            setCards("HEDEF IP", "ŞEHİR / ÜLKE", "İNTERNET SAĞLAYICI", "HARİTA KONUMU");
-        } else if (type === 'port') {
-            input.placeholder = "[+] Port Taranacak IP Adresini Girin";
-            setCards("HEDEF IP", "AÇIK PORT SAYISI", "TARAMA SÜRESİ", "DURUM");
-        } else if (type === 'subdomain') {
-            input.placeholder = "[+] Domain Girin (Örn: google.com)";
-            setCards("HEDEF DOMAIN", "TOPLAM SUBDOMAIN", "A KAYDI", "DURUM");
-        } else if (type === 'leak') {
-            input.placeholder = "[+] E-Posta Girin (Örn: test@gmail.com)";
-            setCards("HEDEF E-POSTA", "SIZINTI DURUMU", "KULLAN-AT MAİL Mİ?", "GÜVENLİK SKORU");
+    async function siteSorgula() {
+        const val = document.getElementById('target-site').value;
+        const out = document.getElementById('res-site');
+        if (!val) return alert("Lütfen bir domain veya IP girin!");
+
+        out.innerText = "Sorgulanıyor...";
+        try {
+            const res = await fetch(`https://ipwhois.app/json/${val}`);
+            const data = await res.json();
+            if (!data.success) return out.innerText = "Sorgu başarısız: " + data.message;
+
+            out.innerText = `IP: ${data.ip}\nÜlke: ${data.country}\nŞehir: ${data.city}\nISP: ${data.isp}\nOrganizasyon: ${data.org}`;
+        } catch (e) {
+            out.innerText = "Bağlantı hatası!";
         }
     }
 
-    function setCards(c1, c2, c3, c4) {
-        document.getElementById('card-1-title').innerText = c1;
-        document.getElementById('card-2-title').innerText = c2;
-        document.getElementById('card-3-title').innerText = c3;
-        document.getElementById('card-4-title').innerText = c4;
-        resetCardValues();
-    }
+    async function portSorgula() {
+        const val = document.getElementById('target-port').value;
+        const out = document.getElementById('res-port');
+        if (!val) return alert("Lütfen bir IP adresi girin!");
 
-    function resetCardValues() {
-        document.getElementById('card-1-val').innerText = "-";
-        document.getElementById('card-2-val').innerText = "-";
-        document.getElementById('card-3-val').innerText = "-";
-        document.getElementById('card-4-val').innerText = "-";
-    }
-
-    async function sorgula() {
-        const val = document.getElementById('target-input').value.trim();
-        const consoleBox = document.getElementById('console-output');
-
-        if (!val) return alert("Lütfen bir hedef girin!");
-
-        if (usedCount >= dailyLimit) {
-            return alert("Günlük ücretsiz sorgulama limitinize ulaştınız!");
+        out.innerText = "Portlar taranıyor (Bu işlem 3-5 sn sürebilir)...";
+        try {
+            const res = await fetch(`https://api.hackertarget.com/nmap/?q=${val}`);
+            const text = await res.text();
+            out.innerText = text;
+        } catch (e) {
+            out.innerText = "Port tarama servisine ulaşılamadı!";
         }
+    }
 
-        usedCount++;
-        document.getElementById('usage-text').innerText = `${usedCount} / ${dailyLimit}`;
-        consoleBox.innerText = `> Sorgulama başlatıldı: [${val}]...\n> Lütfen bekleyin...`;
+    async function emailSorgula() {
+        const val = document.getElementById('target-email').value;
+        const out = document.getElementById('res-email');
+        if (!val) return alert("Lütfen bir e-posta girin!");
 
-        if (activeTab === 'ip') {
-            try {
-                const res = await fetch(`https://ipwhois.app/json/${val}`);
-                const data = await res.json();
-                if (!data.success) return consoleBox.innerText = `> Hata: ${data.message}`;
-
-                document.getElementById('card-1-val').innerText = data.ip;
-                document.getElementById('card-2-val').innerText = `${data.city}, ${data.country}`;
-                document.getElementById('card-3-val').innerText = data.isp;
-                document.getElementById('card-4-val').innerText = `${data.latitude}, ${data.longitude}`;
-
-                consoleBox.innerText = `> [BAŞARILI] IP Bilgileri çekildi.\n> Ülke Kodu: ${data.country_code}\n> Org: ${data.org}\n> Zaman Dilimi: ${data.timezone}`;
-            } catch (e) {
-                consoleBox.innerText = `> Bağlantı hatası oluştu!`;
-            }
-        } else if (activeTab === 'port') {
-            try {
-                const res = await fetch(`https://api.hackertarget.com/nmap/?q=${val}`);
-                const text = await res.text();
-                
-                document.getElementById('card-1-val').innerText = val;
-                document.getElementById('card-2-val').innerText = "Tarama Tamamlandı";
-                document.getElementById('card-3-val').innerText = "Tamamlandı";
-                document.getElementById('card-4-val').innerText = "Aktif";
-
-                consoleBox.innerText = text;
-            } catch (e) {
-                consoleBox.innerText = `> Port servis hatası!`;
-            }
-        } else if (activeTab === 'leak') {
-            try {
-                const res = await fetch(`https://disposable.debounce.io/?email=${val}`);
-                const data = await res.json();
-
-                document.getElementById('card-1-val').innerText = val;
-                document.getElementById('card-2-val').innerText = data.disposable === "true" ? "Riskli Mail" : "Temiz / Normal Mail";
-                document.getElementById('card-3-val').innerText = data.disposable === "true" ? "EVET" : "HAYIR";
-                document.getElementById('card-4-val').innerText = data.disposable === "true" ? "%20 (Düşük)" : "%100 (Yüksek)";
-
-                consoleBox.innerText = `> E-Posta sorgulama tamamlandı.\n> Geçici/Kullan-At Servis Mi: ${data.disposable}`;
-            } catch (e) {
-                consoleBox.innerText = `> E-posta sorgu hatası!`;
-            }
-        } else {
-            consoleBox.innerText = `> Simülasyon modu aktif.\n> Hedef: ${val}`;
+        out.innerText = "E-posta kontrol ediliyor...";
+        try {
+            const res = await fetch(`https://disposable.debounce.io/?email=${val}`);
+            const data = await res.json();
+            out.innerText = `E-Posta: ${val}\nGeçici/Kullan-At E-posta Mı?: ${data.disposable === "true" ? "EVET (Riskli)" : "HAYIR (Güvenli)"}`;
+        } catch (e) {
+            out.innerText = "E-posta sorgu servisine ulaşılamadı!";
         }
     }
 </script>
