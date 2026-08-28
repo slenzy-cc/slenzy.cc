@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slenzy OSINT Platform</title>
+    <title>Slenzy OSINT Intelligence Platform</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -16,6 +16,7 @@
             --accent: #00ff66;
             --border: #1f2937;
             --warning: #f59e0b;
+            --danger: #ef4444;
         }
 
         body {
@@ -30,7 +31,7 @@
 
         .app-container {
             width: 100%;
-            max-width: 700px;
+            max-width: 800px;
         }
 
         header {
@@ -39,7 +40,7 @@
             align-items: center;
             border-bottom: 1px solid var(--border);
             padding-bottom: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .logo {
@@ -80,6 +81,31 @@
         .limit-count {
             color: var(--accent);
             font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         .search-area {
@@ -126,6 +152,7 @@
         .info-card strong {
             font-size: 1.05rem;
             color: var(--text);
+            word-break: break-all;
         }
 
         .status-bar {
@@ -135,9 +162,8 @@
             text-align: center;
         }
 
-        .status-warning {
-            color: var(--warning);
-        }
+        .status-warning { color: var(--warning); }
+        .status-danger { color: var(--danger); }
     </style>
 </head>
 <body>
@@ -151,29 +177,35 @@
         </div>
     </header>
 
-    <!-- Kalan Hak Göstergesi -->
     <div class="limit-box">
         <span>Günlük Ücretsiz Sorgu Hakkı:</span>
         <span class="limit-count"><span id="credits-left">30</span> / 30</span>
     </div>
 
+    <!-- 4 Farklı Araç Sekmesi -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTool('ip')">IP İstihbarat</button>
+        <button class="tab-btn" onclick="switchTool('dns')">Domain / DNS</button>
+        <button class="tab-btn" onclick="switchTool('user')">Kullanıcı Adı</button>
+        <button class="tab-btn" onclick="switchTool('mail')">E-Posta Sızıntı</button>
+    </div>
+
     <div class="search-area">
-        <input type="text" id="target-ip" placeholder="Genel IP Adresi (Örn: 8.8.8.8)">
-        <button class="btn" onclick="lookupIP()">Sorgula</button>
+        <input type="text" id="target-input" placeholder="Genel IP Adresi (Örn: 8.8.8.8)">
+        <button class="btn" onclick="executeSearch()">Sorgula</button>
     </div>
 
     <div class="results-grid" id="results">
-        <div class="info-card"><span>IP Adresi</span><strong id="res-ip">-</strong></div>
-        <div class="info-card"><span>Ülke / Şehir</span><strong id="res-location">-</strong></div>
-        <div class="info-card"><span>İnternet Sağlayıcı (ISP)</span><strong id="res-isp">-</strong></div>
-        <div class="info-card"><span>Koordinat</span><strong id="res-coords">-</strong></div>
+        <div class="info-card"><span id="lbl-1">IP / Hedef</span><strong id="res-1">-</strong></div>
+        <div class="info-card"><span id="lbl-2">Konum / Veri</span><strong id="res-2">-</strong></div>
+        <div class="info-card"><span id="lbl-3">Sağlayıcı / İhlal</span><strong id="res-3">-</strong></div>
+        <div class="info-card"><span id="lbl-4">Ek Bilgi</span><strong id="res-4">-</strong></div>
     </div>
 
-    <div class="status-bar" id="status">Test etmek için genel bir IP (Örn: 8.8.8.8) yazabilirsiniz.</div>
+    <div class="status-bar" id="status">Sorgulama yapılması bekleniyor.</div>
 </div>
 
 <script>
-    // Firebase Konfigürasyonu
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -187,6 +219,7 @@
     const auth = firebase.auth();
 
     let remainingCredits = 30;
+    let activeTool = 'ip';
 
     auth.onAuthStateChanged(user => {
         if (user) {
@@ -207,55 +240,117 @@
         }
     }
 
-    async function lookupIP() {
-        const ip = document.getElementById('target-ip').value.trim();
+    function switchTool(tool) {
+        activeTool = tool;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+
+        const input = document.getElementById('target-input');
+        if(tool === 'ip') {
+            input.placeholder = "Genel IP Adresi (Örn: 8.8.8.8)";
+            setLabels("IP Adresi", "Ülke / Şehir", "İnternet Sağlayıcı (ISP)", "Koordinat");
+        } else if(tool === 'dns') {
+            input.placeholder = "Domain Adresi (Örn: google.com)";
+            setLabels("Domain", "A Kaydı (IP)", "DNS Durumu", "Sorgu Zamanı");
+        } else if(tool === 'user') {
+            input.placeholder = "Kullanıcı Adı (Örn: torvalds)";
+            setLabels("Kullanıcı Adı", "GitHub Profili", "Veri Kaynağı", "Tarama Durumu");
+        } else if(tool === 'mail') {
+            input.placeholder = "E-Posta Adresi (Örn: ornek@gmail.com)";
+            setLabels("E-Posta Adresi", "Güvenlik Durumu", "Sızıntı (Breach) Sayısı", "Analiz Tipi");
+        }
+        resetResults();
+    }
+
+    function setLabels(l1, l2, l3, l4) {
+        document.getElementById('lbl-1').innerText = l1;
+        document.getElementById('lbl-2').innerText = l2;
+        document.getElementById('lbl-3').innerText = l3;
+        document.getElementById('lbl-4').innerText = l4;
+    }
+
+    function resetResults() {
+        document.getElementById('res-1').innerText = '-';
+        document.getElementById('res-2').innerText = '-';
+        document.getElementById('res-3').innerText = '-';
+        document.getElementById('res-4').innerText = '-';
+    }
+
+    async function executeSearch() {
+        const query = document.getElementById('target-input').value.trim();
         const status = document.getElementById('status');
 
-        if (!ip) {
-            status.innerText = 'Lütfen bir IP adresi girin.';
-            status.className = 'status-bar status-warning';
-            return;
-        }
-
-        // 192, 10 veya 172.16 ile başlayan yerel ağ IP kontrolleri
-        if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('127.')) {
-            status.innerText = 'Uyarı: Yerel (Özel) IP adresleri sorgulanamaz. Lütfen harici bir genel IP girin (Örn: 8.8.8.8).';
+        if (!query) {
+            status.innerText = 'Lütfen bir hedef değer girin.';
             status.className = 'status-bar status-warning';
             return;
         }
 
         if (remainingCredits <= 0) {
-            status.innerText = 'Günlük sorgu hakkınız doldu. Devam etmek için Premium üye olun.';
+            status.innerText = 'Günlük ücretsiz sorgu hakkınız bitti.';
             status.className = 'status-bar status-warning';
             return;
         }
 
-        status.innerText = 'Veriler çekiliyor...';
+        status.innerText = 'İstihbarat verisi toplanıyor...';
         status.className = 'status-bar';
 
         try {
-            const res = await fetch(`https://ipapi.co/${ip}/json/`);
-            const data = await res.json();
+            if(activeTool === 'ip') {
+                if (query.startsWith('192.168.') || query.startsWith('10.') || query.startsWith('127.')) {
+                    status.innerText = 'Yerel IP adresleri sorgulanamaz.';
+                    status.className = 'status-bar status-warning';
+                    return;
+                }
+                const res = await fetch(`https://ipapi.co/${query}/json/`);
+                const data = await res.json();
+                
+                document.getElementById('res-1').innerText = data.ip || '-';
+                document.getElementById('res-2').innerText = `${data.city || ''}, ${data.country_name || '-'}`;
+                document.getElementById('res-3').innerText = data.org || '-';
+                document.getElementById('res-4').innerText = `${data.latitude}, ${data.longitude}`;
 
-            if (data.error) {
-                status.innerText = 'Hata: Geçersiz veya sorgulanamayan IP adresi.';
-                status.className = 'status-bar status-warning';
-                return;
+            } else if(activeTool === 'dns') {
+                const res = await fetch(`https://dns.google/resolve?name=${query}`);
+                const data = await res.json();
+
+                document.getElementById('res-1').innerText = query;
+                document.getElementById('res-2').innerText = data.Answer ? data.Answer[0].data : 'Bulunamadı';
+                document.getElementById('res-3').innerText = data.Status === 0 ? 'Aktif (NOERROR)' : 'Hata';
+                document.getElementById('res-4').innerText = new Date().toLocaleTimeString();
+
+            } else if(activeTool === 'user') {
+                const ghRes = await fetch(`https://api.github.com/users/${query}`);
+                document.getElementById('res-1').innerText = query;
+                document.getElementById('res-2').innerText = ghRes.status === 200 ? 'Bulundu (Mevcut)' : 'Bulunamadı';
+                document.getElementById('res-3').innerText = 'Kamuya Açık Veri';
+                document.getElementById('res-4').innerText = 'Tarama Tamamlandı';
+
+            } else if(activeTool === 'mail') {
+                // Kamuya açık ihlal kontrol servisi
+                const res = await fetch(`https://api.xposedornot.com/v1/check-email/${query}`);
+                const data = await res.json();
+
+                document.getElementById('res-1').innerText = query;
+                if (data.Error) {
+                    document.getElementById('res-2').innerText = 'Temiz / İhlal Bulunamadı';
+                    document.getElementById('res-3').innerText = '0 Sızıntı';
+                    status.innerText = 'E-posta adresine ait bilinen bir veri sızıntısı bulunamadı.';
+                } else {
+                    document.getElementById('res-2').innerText = 'RİSKLİ (Sızıntıda Var)';
+                    document.getElementById('res-3').innerText = `${data.breaches ? data.breaches[0].length : 'Tespit Edildi'}`;
+                    status.innerText = 'Uyarı: Bu e-posta adresi geçmiş veri ihlallerinde yer almış!';
+                    status.className = 'status-bar status-danger';
+                }
+                document.getElementById('res-4').innerText = 'Public Breach DB';
             }
 
-            // Sonuçları Ekrala Bas
-            document.getElementById('res-ip').innerText = data.ip || '-';
-            document.getElementById('res-location').innerText = `${data.city || ''}, ${data.country_name || '-'}`;
-            document.getElementById('res-isp').innerText = data.org || '-';
-            document.getElementById('res-coords').innerText = `${data.latitude}, ${data.longitude}`;
-
-            // Krediyi Düşür
             remainingCredits--;
             document.getElementById('credits-left').innerText = remainingCredits;
+            if(activeTool !== 'mail') status.innerText = 'Sorgulama başarıyla tamamlandı!';
 
-            status.innerText = 'Sorgulama başarılı!';
         } catch (err) {
-            status.innerText = 'Veri alınırken bir hata oluştu.';
+            status.innerText = 'Veri çekilirken bir hata oluştu.';
             status.className = 'status-bar status-warning';
         }
     }
