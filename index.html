@@ -256,6 +256,8 @@
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(251, 192, 45, 0.25);
+            width: 100%;
         }
 
         table {
@@ -333,6 +335,7 @@
             <div class="title" id="card-4-title">HARİTA KONUMU</div>
             <div class="value" id="card-4-val">-</div>
         </div>
+        <pre id="res-port">Sonuçlar burada görüntülenecek...</pre>
     </div>
 
     <!-- KONSOL ÇIKTISI -->
@@ -396,6 +399,7 @@
         }
     });
 
+    // Giriş / Çıkış Fonksiyonu
     function toggleAuth() {
         if (auth.currentUser) {
             auth.signOut().then(() => location.reload());
@@ -515,6 +519,7 @@
             alert("Günlük ücretsiz sorgulama limitinize ulaştınız!");
             return;
         }
+    }
 
         usedCount++;
         document.getElementById('usage-text').innerText = `${usedCount} / ${dailyLimit}`;
