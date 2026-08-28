@@ -3,156 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slenzy Cyber Intelligence Platform</title>
+    <title>Slenzy OSINT</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --panel-bg: #161b22;
-            --text-color: #c9d1d9;
-            --accent-color: #00ff66;
-            --border-color: #30363d;
+            --bg: #0a0d12;
+            --card-bg: #121820;
+            --text: #e6edf3;
+            --accent: #00ff66;
+            --border: #1f2937;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
+        .app-container {
+            width: 100%;
+            max-width: 700px;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border);
             padding-bottom: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        h1 {
-            color: var(--accent-color);
-            margin: 0;
-            font-size: 1.5rem;
-        }
-
-        .user-panel {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        button {
-            background: var(--panel-bg);
-            color: var(--accent-color);
-            border: 1px solid var(--accent-color);
-            padding: 8px 15px;
-            cursor: pointer;
-            font-family: inherit;
+        .logo {
             font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
             transition: 0.2s;
         }
 
-        button:hover {
-            background: var(--accent-color);
-            color: var(--bg-color);
+        .btn:hover {
+            background: var(--accent);
+            color: #000;
         }
 
-        .badge {
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-        }
-
-        .badge-free { background: #30363d; color: #fff; }
-        .badge-premium { background: #d97706; color: #fff; }
-
-        .tabs {
+        .search-area {
             display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-
-        .tab-btn {
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-        }
-
-        .tab-btn.active {
-            border-color: var(--accent-color);
-            color: var(--accent-color);
-        }
-
-        .search-box {
-            background: var(--panel-bg);
-            padding: 20px;
-            border: 1px solid var(--border-color);
+            gap: 10px;
             margin-bottom: 20px;
         }
 
-        input[type="text"] {
-            width: 70%;
-            padding: 10px;
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: var(--accent-color);
-            font-family: inherit;
+        input {
+            flex: 1;
+            padding: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
         }
 
-        .terminal-output {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
+        input:focus {
+            border-color: var(--accent);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             padding: 15px;
-            min-height: 200px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            color: #58a6ff;
+            border-radius: 8px;
         }
 
-        .lock-overlay {
-            color: #f85149;
-            font-weight: bold;
+        .info-card span {
+            display: block;
+            font-size: 0.8rem;
+            color: #8b949e;
+            margin-bottom: 5px;
+        }
+
+        .info-card strong {
+            font-size: 1.05rem;
+            color: var(--text);
+        }
+
+        .status-bar {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #8b949e;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="app-container">
     <header>
-        <h1>SLENZY // OSINT PLATFORM</h1>
-        <div class="user-panel">
-            <span id="user-status">Misafir</span>
-            <span id="role-badge" class="badge badge-free">FREE</span>
-            <button id="auth-btn" onclick="toggleAuth()">Google ile Giriş</button>
+        <div class="logo">SLENZY // OSINT</div>
+        <div>
+            <span id="user-display" style="font-size: 0.85rem; margin-right: 10px;">Misafir</span>
+            <button class="btn" onclick="toggleAuth()" id="auth-btn">Giriş Yap</button>
         </div>
     </header>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="setTool('ip')">IP Lookup</button>
-        <button class="tab-btn" onclick="setTool('dns')">DNS Lookup</button>
-        <button class="tab-btn" onclick="setTool('breach')">Email Breach [PREMIUM]</button>
+    <div class="search-area">
+        <input type="text" id="target-ip" placeholder="IP Adresi girin (Örn: 8.8.8.8)">
+        <button class="btn" onclick="lookupIP()">Sorgula</button>
     </div>
 
-    <div class="search-box">
-        <input type="text" id="target-input" placeholder="IP adresi girin (örn: 8.8.8.8)...">
-        <button onclick="executeLookup()">Sorgula</button>
+    <div class="results-grid" id="results">
+        <div class="info-card"><span>IP Adresi</span><strong id="res-ip">-</strong></div>
+        <div class="info-card"><span>Ülke / Şehir</span><strong id="res-location">-</strong></div>
+        <div class="info-card"><span>İnternet Sağlayıcı (ISP)</span><strong id="res-isp">-</strong></div>
+        <div class="info-card"><span>Koordinat</span><strong id="res-coords">-</strong></div>
     </div>
 
-    <div class="terminal-output" id="output">> Sistem hazır. Lütfen bir sorgu çalıştırın.</div>
+    <div class="status-bar" id="status">Sorgulama yapılması bekleniyor.</div>
 </div>
 
 <script>
-    // 1. FIREBASE KONFİGÜRASYONU (Kendi Firebase bilgilerinizle değiştirin)
+    // Firebase Konfigürasyonun
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -162,113 +155,59 @@
         appId: "YOUR_APP_ID"
     };
 
-    // Firebase Başlatma
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore();
 
-    let currentUser = null;
-    let userRole = 'free'; // Varsayılan rol
-    let currentTool = 'ip';
-
-    // 2. KULLANICI OTURUM KONTROLÜ
-    auth.onAuthStateChanged(async (user) => {
+    // Oturum Durumu
+    auth.onAuthStateChanged(user => {
         if (user) {
-            currentUser = user;
-            document.getElementById('user-status').innerText = user.displayName || user.email;
-            document.getElementById('auth-btn').innerText = 'Çıkış Yap';
-
-            // Veritabanından Kullanıcı Rolünü Çek
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-                userRole = userDoc.data().role || 'free';
-            } else {
-                // Yeni Kullanıcı Kaydı
-                await db.collection('users').doc(user.uid).set({
-                    email: user.email,
-                    role: 'free',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                userRole = 'free';
-            }
-
-            updateRoleUI();
+            document.getElementById('user-display').innerText = user.displayName || user.email;
+            document.getElementById('auth-btn').innerText = 'Çıkış';
         } else {
-            currentUser = null;
-            userRole = 'free';
-            document.getElementById('user-status').innerText = 'Misafir';
-            document.getElementById('auth-btn').innerText = 'Google ile Giriş';
-            updateRoleUI();
+            document.getElementById('user-display').innerText = 'Misafir';
+            document.getElementById('auth-btn').innerText = 'Giriş Yap';
         }
     });
 
-    function updateRoleUI() {
-        const badge = document.getElementById('role-badge');
-        badge.innerText = userRole.toUpperCase();
-        badge.className = `badge badge-${userRole}`;
-    }
-
-    // 3. GOOGLE ILE GIRIS / CIKIS
     function toggleAuth() {
-        if (currentUser) {
+        if (auth.currentUser) {
             auth.signOut();
         } else {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(error => {
-                alert("Giriş Hatası: " + error.message);
-            });
+            auth.signInWithPopup(provider);
         }
     }
 
-    // 4. ARAÇ SEÇİMİ VE INPUT TİPİ
-    function setTool(tool) {
-        currentTool = tool;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+    // Basitleştirilmiş IP Sorgu
+    async function lookupIP() {
+        const ip = document.getElementById('target-ip').value.trim();
+        const status = document.getElementById('status');
 
-        const input = document.getElementById('target-input');
-        if (tool === 'ip') input.placeholder = "IP adresi (örn: 8.8.8.8)...";
-        if (tool === 'dns') input.placeholder = "Domain adresi (örn: example.com)...";
-        if (tool === 'breach') input.placeholder = "E-posta adresi (örn: target@gmail.com)...";
-    }
-
-    // 5. SORGU ÇALIŞTIRMA MANTIĞI
-    async function executeLookup() {
-        const target = document.getElementById('target-input').value.trim();
-        const output = document.getElementById('output');
-
-        if (!target) {
-            output.innerText = "> Hata: Lütfen geçerli bir hedef girin.";
+        if (!ip) {
+            status.innerText = 'Lütfen geçerli bir IP girin.';
             return;
         }
 
-        // Yetki Kontrolü (Premium Modüller İçin)
-        if (currentTool === 'breach' && userRole !== 'premium' && userRole !== 'admin') {
-            output.innerHTML = `<span class="lock-overlay">[EŞİK ENGELİ] Bu araç sadece PREMIUM üyeler içindir.\nYükseltmek için yönetici ile iletişime geçin.</span>`;
-            return;
-        }
-
-        output.innerText = `> ${currentTool.toUpperCase()} sorgusu başlatılıyor: ${target}...\n`;
+        status.innerText = 'Veriler çekiliyor...';
 
         try {
-            if (currentTool === 'ip') {
-                const res = await fetch(`https://ipapi.co/${target}/json/`);
-                const data = await res.json();
-                output.innerText = JSON.stringify(data, null, 2);
-            } 
-            else if (currentTool === 'dns') {
-                const res = await fetch(`https://dns.google/resolve?name=${target}`);
-                const data = await res.json();
-                output.innerText = JSON.stringify(data, null, 2);
-            } 
-            else if (currentTool === 'breach') {
-                // Güvenli kamuya açık sızıntı API örneği
-                const res = await fetch(`https://api.xposedornot.com/v1/check-email/${target}`);
-                const data = await res.json();
-                output.innerText = JSON.stringify(data, null, 2);
+            const res = await fetch(`https://ipapi.co/${ip}/json/`);
+            const data = await res.json();
+
+            if (data.error) {
+                status.innerText = 'Hata: Geçersiz IP adresi.';
+                return;
             }
+
+            // Temiz Veri Basımı
+            document.getElementById('res-ip').innerText = data.ip || '-';
+            document.getElementById('res-location').innerText = `${data.city || ''}, ${data.country_name || '-'}`;
+            document.getElementById('res-isp').innerText = data.org || '-';
+            document.getElementById('res-coords').innerText = `${data.latitude}, ${data.longitude}`;
+
+            status.innerText = 'Sorgulama başarılı!';
         } catch (err) {
-            output.innerText = `> Bağlantı hatası: ${err.message}`;
+            status.innerText = 'Veri alınırken hata oluştu.';
         }
     }
 </script>
