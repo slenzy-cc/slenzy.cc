@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SLENZY // OSINT DASHBOARD v6.0 (ADMIN)</title>
 
-    <!-- Firebase SDK Compat Kütüphaneleri -->
+    <!-- Firebase SDK Compat -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -17,7 +17,6 @@
             --border: #1e293b;
             --sari: #fbc02d;
             --text: #f8fafc;
-            --text-dim: #94a3b8;
         }
 
         body {
@@ -55,20 +54,13 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            transition: 0.2s;
         }
 
-        .btn:hover {
-            background: #334155;
-        }
+        .btn:hover { background: #334155; }
 
         .btn-admin {
             background: #b91c1c;
             display: none;
-        }
-
-        .btn-admin:hover {
-            background: #dc2626;
         }
 
         .grid {
@@ -140,13 +132,13 @@
         </div>
     </header>
 
-    <!-- KULLANICI & ROL YÖNETİMİ (Sadece Admin Görür) -->
+    <!-- ADMIN PANELİ -->
     <div id="admin-panel">
         <h3 style="color: var(--sari); margin-top: 0;">👥 Üye & Rol Yönetim Paneli</h3>
         <div id="user-list-container">Kullanıcı verileri yükleniyor...</div>
     </div>
 
-    <!-- OSINT SORGU ARAÇLARI -->
+    <!-- OSINT ARAÇLARI -->
     <div class="grid">
         <div class="card">
             <h3>🌐 Hızlı IP & Site Sorgu</h3>
@@ -172,7 +164,7 @@
 </div>
 
 <script>
-    // Firebase Konfigürasyonu
+    // Gerçek Firebase Bilgilerin
     const firebaseConfig = {
         apiKey: "AIzaSyB-MaZC3_cPmBqytu5L4EMzmYGvxLFWBiK",
         authDomain: "slenzy-osint.firebaseapp.com",
@@ -185,12 +177,10 @@
 
     const ADMIN_EMAIL = "mericegecan37@gmail.com";
 
-    // Firebase Başlatma
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Oturum Durumu Takibi
     auth.onAuthStateChanged(async (user) => {
         const authBtn = document.getElementById('auth-btn');
         const adminPanelBtn = document.getElementById('admin-panel-btn');
@@ -198,7 +188,6 @@
         if (user) {
             authBtn.innerText = 'ÇIKIŞ YAP';
 
-            // Veritabanına Kullanıcı Kaydet/Güncelle
             const userRef = db.collection('users').doc(user.uid);
             const doc = await userRef.get();
 
@@ -217,7 +206,6 @@
                 });
             }
 
-            // Rol Yetki Kontrolü
             const userData = (await userRef.get()).data();
             if (userData?.role === 'admin' || user.email === ADMIN_EMAIL) {
                 adminPanelBtn.style.display = 'inline-block';
@@ -242,13 +230,11 @@
         }
     }
 
-    // Admin Paneli Aç/Kapat
     function adminPanelToggle() {
         const p = document.getElementById('admin-panel');
         p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
-    // Kullanıcıları Listeleme (Admin)
     async function kullanicilariGetir() {
         const listContainer = document.getElementById('user-list-container');
         const snapshot = await db.collection('users').get();
@@ -293,7 +279,6 @@
         listContainer.innerHTML = html;
     }
 
-    // Rol Değiştirme
     async function rolDegistir(uid, yeniRol) {
         try {
             await db.collection('users').doc(uid).update({ role: yeniRol });
@@ -303,8 +288,6 @@
             alert("Rol değiştirilemedi: " + err.message);
         }
     }
-
-    // --- HIZLI OSINT SORGU FONKSİYONLARI ---
 
     async function siteSorgula() {
         const val = document.getElementById('target-site').value;
@@ -328,7 +311,7 @@
         const out = document.getElementById('res-port');
         if (!val) return alert("Lütfen bir IP adresi girin!");
 
-        out.innerText = "Portlar taranıyor (Bu işlem 3-5 sn sürebilir)...";
+        out.innerText = "Portlar taranıyor...";
         try {
             const res = await fetch(`https://api.hackertarget.com/nmap/?q=${val}`);
             const text = await res.text();
@@ -347,7 +330,7 @@
         try {
             const res = await fetch(`https://disposable.debounce.io/?email=${val}`);
             const data = await res.json();
-            out.innerText = `E-Posta: ${val}\nGeçici/Kullan-At E-posta Mı?: ${data.disposable === "true" ? "EVET (Riskli)" : "HAYIR (Güvenli)"}`;
+            out.innerText = `E-Posta: ${val}\nGeçici E-posta Mı?: ${data.disposable === "true" ? "EVET" : "HAYIR"}`;
         } catch (e) {
             out.innerText = "E-posta sorgu servisine ulaşılamadı!";
         }
