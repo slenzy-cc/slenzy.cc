@@ -3,200 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLENZY // OSINT TERMINAL v4.0</title>
+    <title>SLENZY // OSINT DASHBOARD v5.0</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
-            --bg: #030712;
-            --card-bg: #0a1128;
+            --bg: #020617;
+            --panel-bg: rgba(10, 17, 40, 0.75);
             --lacivert: #001f54;
+            --lacivert-light: #0a2540;
             --sari: #fbc02d;
             --sari-bright: #ffeb3b;
-            --border: #1c3144;
-            --text: #e0e6ed;
-            --text-dim: #8d99ae;
+            --border: #1e293b;
+            --border-sari: rgba(251, 192, 45, 0.4);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --success: #10b981;
         }
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 31, 84, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(251, 192, 45, 0.15) 0px, transparent 50%);
             color: var(--text);
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
         }
 
+        /* TAM EKRAN KONTEYNER */
         .app-container {
             width: 100%;
-            max-width: 900px;
-            border: 2px solid var(--lacivert);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
             padding: 20px;
-            background-color: #02050e;
-            box-shadow: 0 0 20px rgba(251, 192, 45, 0.15);
-            position: relative;
+            gap: 15px;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px dashed var(--sari);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-sari);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
         .logo {
-            font-weight: bold;
-            font-size: 1.4rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 900;
+            font-size: 1.6rem;
             color: var(--sari);
-            letter-spacing: 2px;
-            text-shadow: 0 0 8px var(--sari);
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(251, 192, 45, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--sari-bright);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--sari-bright);
+        }
+
+        .header-btns {
+            display: flex;
+            gap: 12px;
         }
 
         .btn {
             background: var(--lacivert);
             color: var(--sari);
             border: 1px solid var(--sari);
-            padding: 8px 16px;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
             font-family: inherit;
-            font-weight: bold;
-            transition: 0.2s;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn:hover {
             background: var(--sari);
             color: #000;
-            box-shadow: 0 0 12px var(--sari);
+            box-shadow: 0 0 15px rgba(251, 192, 45, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-vip {
+            background: linear-gradient(135deg, #fbc02d, #f59e0b);
+            color: #000;
+            border: none;
+        }
+
+        .btn-vip:hover {
+            background: linear-gradient(135deg, #ffeb3b, #fbc02d);
+            box-shadow: 0 0 20px rgba(251, 192, 45, 0.8);
+        }
+
+        /* ANA PANELLERİ DOLDURAN LAYOUT */
+        .dashboard-grid {
+            flex: 1;
+            display: grid;
+            grid-template-rows: auto auto 1fr auto;
+            gap: 15px;
         }
 
         .limit-box {
-            background: var(--card-bg);
-            border: 1px solid var(--sari);
-            padding: 12px 15px;
-            margin-bottom: 20px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            padding: 15px 25px;
+            border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .limit-count {
             color: var(--sari-bright);
-            font-weight: bold;
-            font-size: 1.1rem;
+            font-weight: 800;
+            font-size: 1.2rem;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
         }
 
         .tab-btn {
-            flex: 1;
-            min-width: 130px;
-            padding: 12px;
-            background: var(--card-bg);
+            padding: 14px;
+            background: var(--panel-bg);
             border: 1px solid var(--border);
+            border-radius: 8px;
             color: var(--text-dim);
             cursor: pointer;
             font-family: inherit;
-            font-weight: bold;
-            transition: 0.2s;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
             text-align: center;
         }
 
         .tab-btn.active {
             border-color: var(--sari);
             color: var(--sari-bright);
-            background: var(--lacivert);
-            box-shadow: 0 0 10px rgba(251, 192, 45, 0.3);
+            background: var(--lacivert-light);
+            box-shadow: 0 0 15px rgba(251, 192, 45, 0.25);
         }
 
         .search-area {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
         }
 
         input {
             flex: 1;
-            padding: 12px;
-            background: var(--card-bg);
-            border: 1px solid var(--sari);
+            padding: 15px 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-sari);
+            border-radius: 8px;
             color: var(--sari-bright);
-            font-size: 0.95rem;
-            font-family: inherit;
+            font-size: 1rem;
+            font-family: 'Courier New', Courier, monospace;
             outline: none;
+            transition: 0.3s;
         }
 
         input:focus {
-            box-shadow: 0 0 8px var(--sari);
+            box-shadow: 0 0 12px rgba(251, 192, 45, 0.4);
+            border-color: var(--sari-bright);
         }
 
+        /* KARTLARIN EKRANI DOLDURMASI */
         .results-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
+            min-height: 180px;
         }
 
         .info-card {
-            background: var(--card-bg);
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
             border: 1px solid var(--border);
-            padding: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .info-card:hover {
+            border-color: var(--sari);
         }
 
         .info-card span {
-            display: block;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--sari);
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
         .info-card strong {
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             color: var(--text);
             word-break: break-all;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         .terminal-log {
-            margin-top: 20px;
             background: #01040a;
-            border: 1px solid var(--sari);
-            padding: 12px;
-            font-size: 0.85rem;
+            border: 1px solid var(--border-sari);
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
             color: var(--sari-bright);
-            min-height: 70px;
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 90px;
             white-space: pre-wrap;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
 
+        /* SAĞ GENİŞ AÇILIR PANEL */
         .sidebar {
             position: fixed;
             top: 0;
-            right: -320px;
-            width: 320px;
+            right: -400px;
+            width: 400px;
             height: 100%;
-            background-color: #030a1c;
+            background: rgba(3, 10, 28, 0.95);
+            backdrop-filter: blur(15px);
             border-left: 2px solid var(--sari);
-            box-shadow: -5px 0 25px rgba(0,0,0,0.8);
-            transition: 0.3s ease;
-            padding: 20px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.9);
+            transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+            padding: 25px;
             z-index: 1000;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            overflow-y: auto;
         }
 
         .sidebar.open {
@@ -207,90 +282,127 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--sari);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+            border-bottom: 2px solid var(--sari);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
         }
 
         .close-btn {
             background: transparent;
             border: none;
             color: var(--sari);
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             cursor: pointer;
         }
 
         .sidebar-section {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
+            background: var(--lacivert-light);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
         .sidebar-section h4 {
             color: var(--sari);
-            margin-top: 0;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-            border-left: 3px solid var(--sari);
-            padding-left: 8px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            border-left: 4px solid var(--sari);
+            padding-left: 10px;
         }
 
         .sidebar-section p, .sidebar-section li {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--text-dim);
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
         .sidebar-section ul {
-            padding-left: 20px;
-            margin: 0;
+            padding-left: 18px;
+        }
+
+        .vip-box {
+            background: linear-gradient(145deg, rgba(251, 192, 45, 0.15), rgba(0, 31, 84, 0.4));
+            border: 1px solid var(--sari);
+        }
+
+        .vip-box h4 {
+            color: var(--sari-bright);
+        }
+
+        .price-tag {
+            font-size: 1.3rem;
+            color: var(--sari-bright);
+            font-weight: bold;
+            margin: 8px 0;
         }
 
         .status-warning { color: var(--warning); }
         .status-danger { color: var(--danger); }
+
+        @media (max-width: 768px) {
+            .tabs { grid-template-columns: repeat(2, 1fr); }
+            .results-grid { grid-template-columns: 1fr; }
+            .sidebar { width: 100%; right: -100%; }
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <header>
-        <div class="logo">>_ SLENZY OSINT</div>
-        <div>
+        <div class="logo">SLENZY OSINT v5.0</div>
+        <div class="header-btns">
+            <button class="btn btn-vip" onclick="toggleSidebar()">👑 VIP / PREMIUM</button>
             <button class="btn" onclick="toggleAuth()" id="auth-btn">GİRİŞ YAP</button>
-            <button class="btn" onclick="toggleSidebar()" style="margin-left: 8px;">MENÜ ☰</button>
+            <button class="btn" onclick="toggleSidebar()">MENÜ ☰</button>
         </div>
     </header>
 
-    <div class="limit-box">
-        <span>GÜNLÜK KALAN SORGULAMA HAKKI:</span>
-        <span class="limit-count"><span id="credits-left">30</span> / 30</span>
-    </div>
+    <div class="dashboard-grid">
+        <div class="limit-box">
+            <span>GÜNLÜK ÜCRETSİZ SORGULAMA HAKKI:</span>
+            <span class="limit-count"><span id="credits-left">30</span> / 30</span>
+        </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTool('ip')">IP KONUMU</button>
-        <button class="tab-btn" onclick="switchTool('shodan')">AÇIK PORTLAR</button>
-        <button class="tab-btn" onclick="switchTool('subdomain')">ALT SİTELER</button>
-        <button class="tab-btn" onclick="switchTool('mail')">SIZI NTI KONTROLÜ</button>
-    </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTool('ip')">🌐 IP KONUMU</button>
+            <button class="tab-btn" onclick="switchTool('shodan')">🔌 AÇIK PORTLAR</button>
+            <button class="tab-btn" onclick="switchTool('subdomain')">🔍 ALT SİTELER</button>
+            <button class="tab-btn" onclick="switchTool('mail')">⚠️ SIZINTI KONTROLÜ</button>
+        </div>
 
-    <div class="search-area">
-        <input type="text" id="target-input" placeholder="[+] IP Adresi Girin (Örn: 8.8.8.8)">
-        <button class="btn" onclick="executeSearch()">SORGULA</button>
-    </div>
+        <div class="search-area">
+            <input type="text" id="target-input" placeholder="[+] IP Adresi Girin (Örn: 8.8.8.8)">
+            <button class="btn" onclick="executeSearch()">SORGULA</button>
+        </div>
 
-    <div class="results-grid" id="results">
-        <div class="info-card"><span id="lbl-1">HEDEF IP</span><strong id="res-1">-</strong></div>
-        <div class="info-card"><span id="lbl-2">ŞEHİR / ÜLKE</span><strong id="res-2">-</strong></div>
-        <div class="info-card"><span id="lbl-3">İNTERNET SAĞLAYICI</span><strong id="res-3">-</strong></div>
-        <div class="info-card"><span id="lbl-4">HARİTA KONUMU</span><strong id="res-4">-</strong></div>
-    </div>
+        <div class="results-grid" id="results">
+            <div class="info-card"><span id="lbl-1">HEDEF IP</span><strong id="res-1">-</strong></div>
+            <div class="info-card"><span id="lbl-2">ŞEHİR / ÜLKE</span><strong id="res-2">-</strong></div>
+            <div class="info-card"><span id="lbl-3">İNTERNET SAĞLAYICI</span><strong id="res-3">-</strong></div>
+            <div class="info-card"><span id="lbl-4">HARİTA KONUMU</span><strong id="res-4">-</strong></div>
+        </div>
 
-    <div class="terminal-log" id="status">> Sistem hazır. Lütfen sorgulamak istediğiniz hedefi girin...</div>
+        <div class="terminal-log" id="status">> Sistem aktif. Sorgulama yapmak için yukarıdaki alana bir hedef girin...</div>
+    </div>
 </div>
 
+<!-- SAĞ PANEL -->
 <div class="sidebar" id="sidebar">
     <div>
         <div class="sidebar-header">
-            <h3 style="color: var(--sari); margin: 0;">SİSTEM PANELİ</h3>
+            <h3 style="color: var(--sari); margin: 0;">SİSTEM & VIP PANELİ</h3>
             <button class="close-btn" onclick="toggleSidebar()">×</button>
+        </div>
+
+        <div class="sidebar-section vip-box">
+            <h4>👑 VIP PREMIUM ÜYELİK</h4>
+            <p>Sınırsız sorgulama, API erişimi ve derinlemesine istihbarat raporlarına erişim sağlayın.</p>
+            <div class="price-tag">50 ₺ / Aylık</div>
+            <p style="font-size: 0.8rem; color: var(--sari);">Ödeme Yapmak İçin İletişime Geçin:</p>
+            <p style="font-size: 0.85rem; color: #fff; margin-top: 4px;"><strong>Papara / IBAN:</strong> TR00 0000 0000 0000 0000 0000 00</p>
+            <p style="font-size: 0.85rem; color: #fff;"><strong>Discord / İletişim:</strong> Meriç Ege C.</p>
         </div>
 
         <div class="sidebar-section">
@@ -301,19 +413,14 @@
         <div class="sidebar-section">
             <h4>KATKIDA BULUNANLAR</h4>
             <ul>
-                <li><strong>Meriç Ege C.</strong> (Baş Geliştirici & Tasarım)</li>
-                <li>SLENZY Security Team</li>
+                <li><strong>Meriç Ege C.</strong> (Lead Dev & Architect)</li>
+                <li>SLENZY Security Lab</li>
             </ul>
-        </div>
-
-        <div class="sidebar-section">
-            <h4>SİSTEM HAKKINDA</h4>
-            <p>SLENZY OSINT, kamuya açık verileri tarayarak IP, Port ve Güvenlik sızıntı analizi sunan gelişmiş bir istihbarat aracıdır.</p>
         </div>
     </div>
 
     <div style="text-align: center; font-size: 0.75rem; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 10px;">
-        SLENZY OSINT v4.0 - Tüm Hakları Saklıdır.
+        SLENZY OSINT v5.0 - Professional Security Platform
     </div>
 </div>
 
@@ -394,7 +501,7 @@
             setLabels("HEDEF SITE", "BULUNAN ALT SİTELER", "VERİ KAYNAĞI", "ANALİZ DURUMU");
         } else if(tool === 'mail') {
             input.placeholder = "[+] E-Posta Adresi Girin (Örn: ornek@gmail.com)";
-            setLabels("HEDEF E-POSTA", "GÜVENLİK DURUMU", "SIZI NTI SAYISI", "IZSIZ VERİ KAYNAKLARI");
+            setLabels("HEDEF E-POSTA", "GÜVENLİK DURUMU", "SIZINTI SAYISI", "VERİ KAYNAKLARI");
         }
         resetResults();
     }
@@ -425,7 +532,7 @@
         }
 
         if (credits <= 0) {
-            status.innerText = '[!] ERİŞİM ENGELENDİ: Günlük ücretsiz sorgulama hakkınız bitti (0/30). Sınırsız erişim için Premium pakete geçin.';
+            status.innerText = '[!] ERİŞİM ENGELENDİ: Günlük ücretsiz sorgulama hakkınız bitti (0/30). Sınırsız erişim için VIP Premium pakete geçin.';
             status.className = 'terminal-log status-danger';
             return;
         }
