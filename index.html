@@ -4,30 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SLENZY // OSINT DASHBOARD v6.0 (ADMIN)</title>
+
+    <!-- Firebase SDK Compat Kütüphaneleri -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --bg: #020617;
-            --panel-bg: rgba(10, 17, 40, 0.75);
-            --lacivert: #001f54;
-            --lacivert-light: #0a2540;
-            --sari: #fbc02d;
-            --sari-bright: #ffeb3b;
+            --panel-bg: rgba(15, 23, 42, 0.95);
             --border: #1e293b;
-            --border-sari: rgba(251, 192, 45, 0.4);
+            --sari: #fbc02d;
             --text: #f8fafc;
             --text-dim: #94a3b8;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --success: #10b981;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
@@ -37,549 +27,329 @@
                 radial-gradient(at 100% 100%, rgba(251, 192, 45, 0.15) 0px, transparent 50%);
             color: var(--text);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            margin: 0;
+            padding: 20px;
         }
 
-        /* TAM EKRAN KONTEYNER */
-        .app-container {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 15px;
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 15px 20px;
             background: var(--panel-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-sari);
-            padding: 15px 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-
-        .logo {
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: 900;
-            font-size: 1.6rem;
-            color: var(--sari);
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(251, 192, 45, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header-btns {
-            display: flex;
-            gap: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
 
         .btn {
-            background: var(--lacivert);
-            color: var(--sari);
-            border: 1px solid var(--sari);
-            padding: 10px 20px;
-            border-radius: 8px;
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid #334155;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: bold;
+            transition: 0.2s;
         }
 
         .btn:hover {
-            background: var(--sari);
-            color: #000;
-            box-shadow: 0 0 15px rgba(251, 192, 45, 0.6);
-            transform: translateY(-2px);
+            background: #334155;
         }
 
         .btn-admin {
-            background: linear-gradient(135deg, #ef4444, #991b1b);
-            color: #fff;
-            border: none;
-            display: none; /* Sadece Admin Giriş Yapınca Görünür */
+            background: #b91c1c;
+            display: none;
         }
 
-        .btn-vip {
-            background: linear-gradient(135deg, #fbc02d, #f59e0b);
-            color: #000;
-            border: none;
+        .btn-admin:hover {
+            background: #dc2626;
         }
 
-        .dashboard-grid {
-            flex: 1;
+        .grid {
             display: grid;
-            grid-template-rows: auto auto 1fr auto;
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        .limit-box {
-            background: var(--panel-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            padding: 15px 25px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.95rem;
-        }
-
-        .limit-count {
-            color: var(--sari-bright);
-            font-weight: 800;
-            font-size: 1.2rem;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .tabs {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        .tab-btn {
-            padding: 14px;
+        .card {
             background: var(--panel-bg);
             border: 1px solid var(--border);
+            padding: 20px;
             border-radius: 8px;
-            color: var(--text-dim);
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-
-        .tab-btn.active {
-            border-color: var(--sari);
-            color: var(--sari-bright);
-            background: var(--lacivert-light);
-            box-shadow: 0 0 15px rgba(251, 192, 45, 0.25);
-        }
-
-        .search-area {
-            display: flex;
-            gap: 12px;
         }
 
         input {
-            flex: 1;
-            padding: 15px 20px;
-            background: var(--panel-bg);
-            border: 1px solid var(--border-sari);
-            border-radius: 8px;
-            color: var(--sari-bright);
-            font-size: 1rem;
-            font-family: 'Courier New', Courier, monospace;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            min-height: 180px;
-        }
-
-        .info-card {
-            background: var(--panel-bg);
-            backdrop-filter: blur(10px);
+            width: 100%;
+            padding: 10px;
+            background: #0f172a;
             border: 1px solid var(--border);
-            padding: 20px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            color: #fff;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
         }
 
-        .info-card span {
-            font-size: 0.85rem;
-            color: var(--sari);
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .info-card strong {
-            font-size: 1.1rem;
-            color: var(--text);
-            word-break: break-all;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .terminal-log {
-            background: #01040a;
-            border: 1px solid var(--border-sari);
-            padding: 15px 20px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            color: var(--sari-bright);
-            font-family: 'Courier New', Courier, monospace;
-            min-height: 90px;
+        pre {
+            background: #090d16;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            color: #38bdf8;
+            max-height: 200px;
+            overflow-y: auto;
             white-space: pre-wrap;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
 
-        /* MODAL & PANEL STİLLERİ */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: -450px;
-            width: 450px;
-            height: 100%;
-            background: rgba(3, 10, 28, 0.98);
-            backdrop-filter: blur(15px);
-            border-left: 2px solid var(--sari);
-            box-shadow: -10px 0 30px rgba(0,0,0,0.9);
-            transition: 0.4s ease;
-            padding: 25px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow-y: auto;
-        }
-
-        .sidebar.open { right: 0; }
-
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--sari);
-            padding-bottom: 12px;
+        #admin-panel {
+            display: none;
+            background: var(--panel-bg);
+            border: 1px solid var(--sari);
+            padding: 20px;
+            border-radius: 8px;
             margin-bottom: 20px;
         }
 
-        .close-btn {
-            background: transparent;
-            border: none;
-            color: var(--sari);
-            font-size: 1.8rem;
-            cursor: pointer;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
         }
 
-        .user-row {
-            background: var(--lacivert-light);
-            border: 1px solid var(--border);
+        th, td {
             padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-        }
-
-        .role-badge {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .role-user { background: #3b82f6; color: #fff; }
-        .role-vip { background: #f59e0b; color: #000; }
-        .role-admin { background: #ef4444; color: #fff; }
-
-        .status-warning { color: var(--warning); }
-        .status-danger { color: var(--danger); }
-
-        @media (max-width: 768px) {
-            .tabs { grid-template-columns: repeat(2, 1fr); }
-            .results-grid { grid-template-columns: 1fr; }
-            .sidebar { width: 100%; right: -100%; }
+            border-bottom: 1px solid var(--border);
+            text-align: left;
         }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<div class="container">
     <header>
-        <div class="logo">SLENZY OSINT v6.0</div>
-        <div class="header-btns">
-            <button class="btn btn-admin" id="admin-panel-btn" onclick="openAdminPanel()">🛠️ ADMİN PANELİ</button>
-            <button class="btn btn-vip" onclick="toggleSidebar('vip')">👑 VIP / PREMIUM</button>
-            <button class="btn" onclick="toggleAuth()" id="auth-btn">GİRİŞ YAP</button>
-            <button class="btn" onclick="toggleSidebar('menu')">MENÜ ☰</button>
+        <h2>SLENZY // OSINT DASHBOARD</h2>
+        <div>
+            <button id="admin-panel-btn" class="btn btn-admin" onclick="adminPanelToggle()">🛠️ ADMİN PANELİ</button>
+            <button id="auth-btn" class="btn" onclick="toggleAuth()">GİRİŞ YAP</button>
         </div>
     </header>
 
-    <div class="dashboard-grid">
-        <div class="limit-box">
-            <span>GÜNLÜK KALAN SORGULAMA HAKKI:</span>
-            <span class="limit-count"><span id="credits-left">30</span> / 30</span>
-        </div>
-
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTool('ip')">🌐 IP KONUMU</button>
-            <button class="tab-btn" onclick="switchTool('shodan')">🔌 AÇIK PORTLAR</button>
-            <button class="tab-btn" onclick="switchTool('subdomain')">🔍 ALT SİTELER</button>
-            <button class="tab-btn" onclick="switchTool('mail')">⚠️ SIZINTI KONTROLÜ</button>
-        </div>
-
-        <div class="search-area">
-            <input type="text" id="target-input" placeholder="[+] IP Adresi Girin (Örn: 8.8.8.8)">
-            <button class="btn" onclick="executeSearch()">SORGULA</button>
-        </div>
-
-        <div class="results-grid" id="results">
-            <div class="info-card"><span id="lbl-1">HEDEF IP</span><strong id="res-1">-</strong></div>
-            <div class="info-card"><span id="lbl-2">ŞEHİR / ÜLKE</span><strong id="res-2">-</strong></div>
-            <div class="info-card"><span id="lbl-3">İNTERNET SAĞLAYICI</span><strong id="res-3">-</strong></div>
-            <div class="info-card"><span id="lbl-4">HARİTA KONUMU</span><strong id="res-4">-</strong></div>
-        </div>
-
-        <div class="terminal-log" id="status">> Sistem aktif. Sorgulama yapmak için bir hedef parametre girin...</div>
-    </div>
-</div>
-
-<!-- SAĞ PANEL (MENÜ VE ADMİN İÇİN ORTAK) -->
-<div class="sidebar" id="sidebar">
-    <div>
-        <div class="sidebar-header">
-            <h3 style="color: var(--sari); margin: 0;" id="sidebar-title">SİSTEM PANELİ</h3>
-            <button class="close-btn" onclick="closeSidebar()">×</button>
-        </div>
-
-        <div id="sidebar-content">
-            <!-- Dinamik İçerik Buraya Gelecek -->
-        </div>
+    <!-- KULLANICI & ROL YÖNETİMİ (Sadece Admin Görür) -->
+    <div id="admin-panel">
+        <h3 style="color: var(--sari); margin-top: 0;">👥 Üye & Rol Yönetim Paneli</h3>
+        <div id="user-list-container">Kullanıcı verileri yükleniyor...</div>
     </div>
 
-    <div style="text-align: center; font-size: 0.75rem; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 10px;">
-        SLENZY OSINT v6.0 - Admin Integrated Platform
+    <!-- OSINT SORGU ARAÇLARI -->
+    <div class="grid">
+        <div class="card">
+            <h3>🌐 Hızlı IP & Site Sorgu</h3>
+            <input type="text" id="target-site" placeholder="Örn: google.com veya IP">
+            <button class="btn" onclick="siteSorgula()">Sorgula</button>
+            <pre id="res-site">Sonuç bekleniyor...</pre>
+        </div>
+
+        <div class="card">
+            <h3>⚡ Hızlı Port Taraması</h3>
+            <input type="text" id="target-port" placeholder="Örn: 8.8.8.8">
+            <button class="btn" onclick="portSorgula()">Açık Portları Tara</button>
+            <pre id="res-port">Sonuç bekleniyor...</pre>
+        </div>
+
+        <div class="card">
+            <h3>📧 E-posta / Gmail Sorgu</h3>
+            <input type="text" id="target-email" placeholder="Örn: ornek@gmail.com">
+            <button class="btn" onclick="emailSorgula()">Sorgula</button>
+            <pre id="res-email">Sonuç bekleniyor...</pre>
+        </div>
     </div>
 </div>
 
 <script>
-    // 🔴 BU KISMA KENDİ FIREBASE BİLGİLERİNİ YAPIŞTIRMALISIN
+    // Firebase Konfigürasyonu
     const firebaseConfig = {
-  apiKey: "AIzaSyB-MAzC3_cPmBqytu5L4EMzmYGvxLFWBik",
-  authDomain: "slenzy-osint.firebaseapp.com",
-  projectId: "slenzy-osint",
-  storageBucket: "slenzy-osint.firebasestorage.app",
-  messagingSenderId: "422738373532",
-  appId: "1:422738373532:web:35f70c75a875917c413659",
-  measurementId: "G-S39DH7GZZC"
-};
+        apiKey: "AIzaSyB-MaZC3_cPmBqytu5L4EMzmYGvxLFWBiK",
+        authDomain: "slenzy-osint.firebaseapp.com",
+        projectId: "slenzy-osint",
+        storageBucket: "slenzy-osint.firebasestorage.app",
+        messagingSenderId: "422738373532",
+        appId: "1:422738373532:web:35f70c75a875917c413659",
+        measurementId: "G-S39DH7GZZC"
+    };
 
-    // 🔴 KENDİ E-POSTA ADRESİNİ BURAYA YAZ (ADMİN YETKİSİ İÇİN)
-    const ADMIN_EMAIL = "mericegecan37@gmail.com"; 
+    const ADMIN_EMAIL = "mericegecan37@gmail.com";
 
+    // Firebase Başlatma
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let currentUserDoc = null;
-    let activeTool = 'ip';
-
+    // Oturum Durumu Takibi
     auth.onAuthStateChanged(async (user) => {
+        const authBtn = document.getElementById('auth-btn');
+        const adminPanelBtn = document.getElementById('admin-panel-btn');
+
         if (user) {
-            document.getElementById('auth-btn').innerText = 'ÇIKIŞ YAP';
-            
-            // Kullanıcıyı Firestore Veritabanına Kaydet / Güncelle
+            authBtn.innerText = 'ÇIKIŞ YAP';
+
+            // Veritabanına Kullanıcı Kaydet/Güncelle
             const userRef = db.collection('users').doc(user.uid);
             const doc = await userRef.get();
 
             if (!doc.exists) {
-                const isOwner = user.email === ADMIN_EMAIL;
-                currentUserDoc = {
+                await userRef.set({
+                    uid: user.uid,
                     email: user.email,
-                    name: user.displayName || 'İsimsiz Kullanıcı',
-                    role: isOwner ? 'admin' : 'user',
-                    createdAt: new Date().toISOString()
-                };
-                await userRef.set(currentUserDoc);
+                    displayName: user.displayName || 'İsimsiz Kullanıcı',
+                    photoURL: user.photoURL || '',
+                    role: user.email === ADMIN_EMAIL ? 'admin' : 'user',
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
             } else {
-                currentUserDoc = doc.data();
+                await userRef.update({
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
             }
 
-            // Eğer Admin ise Admin Butonunu Göster
-            if (user.email === ADMIN_EMAIL || currentUserDoc.role === 'admin') {
-                document.getElementById('admin-panel-btn').style.display = 'flex';
+            // Rol Yetki Kontrolü
+            const userData = (await userRef.get()).data();
+            if (userData?.role === 'admin' || user.email === ADMIN_EMAIL) {
+                adminPanelBtn.style.display = 'inline-block';
+                kullanicilariGetir();
+            } else {
+                adminPanelBtn.style.display = 'none';
             }
-
-            // VIP / Admin Kullanıcılar için Hak Kontrolü
-            if (currentUserDoc.role === 'vip' || currentUserDoc.role === 'admin') {
-                document.getElementById('credits-left').innerText = "SINIRSIZ (VIP)";
-            }
-
         } else {
-            document.getElementById('auth-btn').innerText = 'GİRİŞ YAP';
-            document.getElementById('admin-panel-btn').style.display = 'none';
-            currentUserDoc = null;
+            authBtn.innerText = 'GİRİŞ YAP';
+            adminPanelBtn.style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'none';
         }
     });
 
+    // Giriş / Çıkış Fonksiyonu
     function toggleAuth() {
         if (auth.currentUser) {
-            auth.signOut();
-            location.reload();
+            auth.signOut().then(() => location.reload());
         } else {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
+            auth.signInWithPopup(provider).catch(err => alert("Giriş Hatası: " + err.message));
         }
     }
 
-    function toggleSidebar(type) {
-        const sidebar = document.getElementById('sidebar');
-        const title = document.getElementById('sidebar-title');
-        const content = document.getElementById('sidebar-content');
-
-        if (type === 'vip') {
-            title.innerText = "👑 VIP PREMIUM PAKET";
-            content.innerHTML = `
-                <div style="background: var(--lacivert-light); padding:15px; border-radius:8px; border:1px solid var(--sari);">
-                    <h4 style="color:var(--sari-bright)">Sınırsız OSINT Erişimi</h4>
-                    <p style="font-size:0.9rem; color:var(--text-dim); margin:10px 0;">Sorgulama limitlerine takılmadan derinlemesine analiz yapın.</p>
-                    <div style="font-size:1.4rem; color:var(--sari-bright); font-weight:bold;">50 ₺ / Aylık</div>
-                    <p style="font-size:0.85rem; margin-top:15px;"><strong>IBAN:</strong> TR00 0000 0000 0000 0000 0000 00</p>
-                    <p style="font-size:0.85rem;"><strong>İletişim:</strong> Meriç Ege C.</p>
-                </div>`;
-        } else {
-            title.innerText = "SİSTEM PANELİ";
-            content.innerHTML = `
-                <div style="margin-bottom:15px;">
-                    <h4 style="color:var(--sari)">Geliştiriciler</h4>
-                    <p style="font-size:0.9rem;">Meriç Ege C. (Lead Architect)</p>
-                </div>`;
-        }
-
-        sidebar.classList.add('open');
+    // Admin Paneli Aç/Kapat
+    function adminPanelToggle() {
+        const p = document.getElementById('admin-panel');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
-    function closeSidebar() {
-        document.getElementById('sidebar').classList.remove('open');
-    }
+    // Kullanıcıları Listeleme (Admin)
+    async function kullanicilariGetir() {
+        const listContainer = document.getElementById('user-list-container');
+        const snapshot = await db.collection('users').get();
 
-    // ADMİN PANELİ: GİRİŞ YAPAN TÜM KULLANICILARI LİSTELE VE ROL DEĞİŞTİR
-    async function openAdminPanel() {
-        const sidebar = document.getElementById('sidebar');
-        const title = document.getElementById('sidebar-title');
-        const content = document.getElementById('sidebar-content');
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kullanıcı</th>
+                        <th>E-Posta</th>
+                        <th>Rol</th>
+                        <th>Rol Değiştir</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
 
-        title.innerText = "🛠️ ADMİN YÖNETİM PANELİ";
-        content.innerHTML = `<p style="color:var(--sari)">Kullanıcı listesi yükleniyor...</p>`;
-        sidebar.classList.add('open');
-
-        try {
-            const snapshot = await db.collection('users').get();
-            let html = `<div style="margin-bottom:15px; font-size:0.85rem; color:var(--text-dim);">Sisteme Kayıtlı Toplam Kullanıcı: ${snapshot.size}</div>`;
-
-            snapshot.forEach(doc => {
-                const u = doc.data();
-                const uid = doc.id;
-                const badgeClass = u.role === 'admin' ? 'role-admin' : (u.role === 'vip' ? 'role-vip' : 'role-user');
-
-                html += `
-                    <div class="user-row">
-                        <div>
-                            <strong>${u.name || 'İsimsiz'}</strong><br>
-                            <span style="font-size:0.75rem; color:var(--text-dim);">${u.email}</span>
-                        </div>
-                        <div style="text-align:right;">
-                            <span class="role-badge ${badgeClass}">${u.role.toUpperCase()}</span><br>
-                            ${u.role !== 'admin' ? `
-                                <button onclick="changeUserRole('${uid}', '${u.role === 'vip' ? 'user' : 'vip'}')" 
-                                        style="margin-top:5px; background:var(--sari); color:#000; border:none; padding:3px 6px; font-size:0.7rem; font-weight:bold; cursor:pointer; border-radius:3px;">
-                                    ${u.role === 'vip' ? 'VIP İptal Et' : 'VIP Yap 👑'}
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-            });
-
-            content.innerHTML = html;
-
-        } catch (err) {
-            content.innerHTML = `<p style="color:var(--danger)">Kullanıcılar çekilirken hata oluştu. Firestore yetkilerini kontrol edin.</p>`;
-        }
-    }
-
-    async function changeUserRole(uid, newRole) {
-        await db.collection('users').doc(uid).update({ role: newRole });
-        alert("Kullanıcı rolü güncellendi!");
-        openAdminPanel(); // Paneli yenile
-    }
-
-    // SORGULAMA KODLARI
-    function getRemainingCredits() {
-        if (currentUserDoc && (currentUserDoc.role === 'vip' || currentUserDoc.role === 'admin')) {
-            return 999;
-        }
-        const today = new Date().toISOString().split('T')[0];
-        const savedData = JSON.parse(localStorage.getItem('slenzy_credits') || '{}');
-        if (savedData.date !== today) {
-            localStorage.setItem('slenzy_credits', JSON.stringify({ date: today, count: 30 }));
-            return 30;
-        }
-        return savedData.count;
-    }
-
-    function switchTool(tool) {
-        activeTool = tool;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if (event && event.target) event.target.classList.add('active');
-        const input = document.getElementById('target-input');
-        if(tool === 'ip') input.placeholder = "[+] IP Adresi Girin (Örn: 8.8.8.8)";
-        else if(tool === 'shodan') input.placeholder = "[+] Port Taraması İçin IP Girin";
-        else if(tool === 'subdomain') input.placeholder = "[+] Web Sitesi Girin (Örn: hedefsite.com)";
-        else if(tool === 'mail') input.placeholder = "[+] E-Posta Adresi Girin (Örn: ornek@gmail.com)";
-    }
-
-    async function executeSearch() {
-        const query = document.getElementById('target-input').value.trim();
-        const status = document.getElementById('status');
-        let credits = getRemainingCredits();
-
-        if (!query) {
-            status.innerText = '[!] HATA: Lütfen sorgulamak istediğiniz hedefi boş bırakmayın.';
-            status.className = 'terminal-log status-warning';
-            return;
-        }
-
-        if (credits <= 0) {
-            status.innerText = '[!] ERİŞİM ENGELENDİ: Günlük 30 ücretsiz sorgu hakkınız bitti. VIP Pakete geçin.';
-            status.className = 'terminal-log status-danger';
-            return;
-        }
-
-        status.innerText = `[+] [${query}] taranıyor...`;
-        
-        try {
-            if(activeTool === 'ip') {
-                const res = await fetch(`https://ipapi.co/${query}/json/`);
-                const data = await res.json();
-                document.getElementById('res-1').innerText = data.ip || '-';
-                document.getElementById('res-2').innerText = `${data.city || ''}, ${data.country_name || '-'}`;
-                document.getElementById('res-3').innerText = data.org || '-';
-                document.getElementById('res-4').innerText = `${data.latitude}, ${data.longitude}`;
-                status.innerText = `[+] IP Konum bilgisi başarıyla çekildi.`;
-            }
+        snapshot.forEach(doc => {
+            const u = doc.data();
+            const badgeColor = u.role === 'admin' ? '#ef4444' : (u.role === 'vip' ? '#f59e0b' : '#3b82f6');
             
-            if (!currentUserDoc || (currentUserDoc.role !== 'vip' && currentUserDoc.role !== 'admin')) {
-                credits--;
-                const today = new Date().toISOString().split('T')[0];
-                localStorage.setItem('slenzy_credits', JSON.stringify({ date: today, count: credits }));
-                document.getElementById('credits-left').innerText = credits;
-            }
+            html += `
+                <tr>
+                    <td style="display:flex; align-items:center; gap:8px;">
+                        <img src="${u.photoURL || 'https://via.placeholder.com/28'}" style="width:28px; height:28px; border-radius:50%;">
+                        ${u.displayName}
+                    </td>
+                    <td>${u.email}</td>
+                    <td><span style="background:${badgeColor}; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:bold;">${(u.role || 'user').toUpperCase()}</span></td>
+                    <td>
+                        <select onchange="rolDegistir('${u.uid}', this.value)" style="background:#0f172a; color:#fff; border:1px solid #334155; padding:4px; border-radius:4px;">
+                            <option value="user" ${u.role === 'user' ? 'selected' : ''}>User</option>
+                            <option value="vip" ${u.role === 'vip' ? 'selected' : ''}>VIP</option>
+                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `</tbody></table>`;
+        listContainer.innerHTML = html;
+    }
+
+    // Rol Değiştirme
+    async function rolDegistir(uid, yeniRol) {
+        try {
+            await db.collection('users').doc(uid).update({ role: yeniRol });
+            alert("Rol başarıyla güncellendi!");
+            kullanicilariGetir();
+        } catch (err) {
+            alert("Rol değiştirilemedi: " + err.message);
+        }
+    }
+
+    // --- HIZLI OSINT SORGU FONKSİYONLARI ---
+
+    async function siteSorgula() {
+        const val = document.getElementById('target-site').value;
+        const out = document.getElementById('res-site');
+        if (!val) return alert("Lütfen bir domain veya IP girin!");
+
+        out.innerText = "Sorgulanıyor...";
+        try {
+            const res = await fetch(`https://ipwhois.app/json/${val}`);
+            const data = await res.json();
+            if (!data.success) return out.innerText = "Sorgu başarısız: " + data.message;
+
+            out.innerText = `IP: ${data.ip}\nÜlke: ${data.country}\nŞehir: ${data.city}\nISP: ${data.isp}\nOrganizasyon: ${data.org}`;
         } catch (e) {
-            status.innerText = '[!] HATA: Veri alınamadı.';
+            out.innerText = "Bağlantı hatası!";
+        }
+    }
+
+    async function portSorgula() {
+        const val = document.getElementById('target-port').value;
+        const out = document.getElementById('res-port');
+        if (!val) return alert("Lütfen bir IP adresi girin!");
+
+        out.innerText = "Portlar taranıyor (Bu işlem 3-5 sn sürebilir)...";
+        try {
+            const res = await fetch(`https://api.hackertarget.com/nmap/?q=${val}`);
+            const text = await res.text();
+            out.innerText = text;
+        } catch (e) {
+            out.innerText = "Port tarama servisine ulaşılamadı!";
+        }
+    }
+
+    async function emailSorgula() {
+        const val = document.getElementById('target-email').value;
+        const out = document.getElementById('res-email');
+        if (!val) return alert("Lütfen bir e-posta girin!");
+
+        out.innerText = "E-posta kontrol ediliyor...";
+        try {
+            const res = await fetch(`https://disposable.debounce.io/?email=${val}`);
+            const data = await res.json();
+            out.innerText = `E-Posta: ${val}\nGeçici/Kullan-At E-posta Mı?: ${data.disposable === "true" ? "EVET (Riskli)" : "HAYIR (Güvenli)"}`;
+        } catch (e) {
+            out.innerText = "E-posta sorgu servisine ulaşılamadı!";
         }
     }
 </script>
