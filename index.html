@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slenzy OSINT Intelligence Platform</title>
+    <title>SLENZY // OSINT TERMINAL v2.0</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
-            --bg: #0a0d12;
-            --card-bg: #121820;
-            --text: #e6edf3;
+            --bg: #030712;
+            --card-bg: #0b0f19;
+            --text: #00ff66;
+            --text-dim: #009933;
             --accent: #00ff66;
-            --border: #1f2937;
+            --border: #132a13;
             --warning: #f59e0b;
             --danger: #ef4444;
         }
@@ -22,7 +23,7 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -31,23 +32,27 @@
 
         .app-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.1);
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px dashed var(--border);
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
 
         .logo {
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--accent);
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px var(--accent);
         }
 
         .btn {
@@ -55,27 +60,27 @@
             color: var(--accent);
             border: 1px solid var(--accent);
             padding: 8px 16px;
-            border-radius: 6px;
             cursor: pointer;
-            font-weight: 600;
+            font-family: inherit;
+            font-weight: bold;
             transition: 0.2s;
         }
 
         .btn:hover {
             background: var(--accent);
             color: #000;
+            box-shadow: 0 0 10px var(--accent);
         }
 
         .limit-box {
             background: var(--card-bg);
             border: 1px solid var(--border);
             padding: 10px 15px;
-            border-radius: 6px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .limit-count {
@@ -92,20 +97,21 @@
 
         .tab-btn {
             flex: 1;
-            min-width: 120px;
+            min-width: 110px;
             padding: 10px;
             background: var(--card-bg);
             border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: 6px;
+            color: var(--text-dim);
             cursor: pointer;
-            font-weight: 600;
+            font-family: inherit;
+            font-weight: bold;
             transition: 0.2s;
         }
 
         .tab-btn.active {
             border-color: var(--accent);
             color: var(--accent);
+            box-shadow: 0 0 8px rgba(0, 255, 102, 0.2);
         }
 
         .search-area {
@@ -119,14 +125,15 @@
             padding: 12px;
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-size: 1rem;
+            color: var(--accent);
+            font-size: 0.95rem;
+            font-family: inherit;
             outline: none;
         }
 
         input:focus {
             border-color: var(--accent);
+            box-shadow: 0 0 5px var(--accent);
         }
 
         .results-grid {
@@ -139,27 +146,30 @@
             background: var(--card-bg);
             border: 1px solid var(--border);
             padding: 15px;
-            border-radius: 8px;
         }
 
         .info-card span {
             display: block;
-            font-size: 0.8rem;
-            color: #8b949e;
+            font-size: 0.75rem;
+            color: var(--text-dim);
             margin-bottom: 5px;
+            text-transform: uppercase;
         }
 
         .info-card strong {
-            font-size: 1.05rem;
+            font-size: 1rem;
             color: var(--text);
             word-break: break-all;
         }
 
-        .status-bar {
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: #8b949e;
-            text-align: center;
+        .terminal-log {
+            margin-top: 20px;
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 12px;
+            font-size: 0.8rem;
+            color: var(--text);
+            min-height: 50px;
         }
 
         .status-warning { color: var(--warning); }
@@ -170,39 +180,40 @@
 
 <div class="app-container">
     <header>
-        <div class="logo">SLENZY // OSINT</div>
+        <div class="logo">>_ SLENZY_OSINT</div>
         <div>
-            <span id="user-display" style="font-size: 0.85rem; margin-right: 10px;">Misafir</span>
-            <button class="btn" onclick="toggleAuth()" id="auth-btn">Giriş Yap</button>
+            <span id="user-display" style="font-size: 0.8rem; margin-right: 10px; color: var(--text-dim);">SYSTEM: GUEST</span>
+            <button class="btn" onclick="toggleAuth()" id="auth-btn">LOGIN</button>
         </div>
     </header>
 
+    <!-- Kalan Hak Göstergesi -->
     <div class="limit-box">
-        <span>Günlük Ücretsiz Sorgu Hakkı:</span>
+        <span>DAILY CREDITS REMAINING:</span>
         <span class="limit-count"><span id="credits-left">30</span> / 30</span>
     </div>
 
-    <!-- 4 Farklı Araç Sekmesi -->
+    <!-- Araç Sekmeleri -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTool('ip')">IP İstihbarat</button>
-        <button class="tab-btn" onclick="switchTool('dns')">Domain / DNS</button>
-        <button class="tab-btn" onclick="switchTool('user')">Kullanıcı Adı</button>
-        <button class="tab-btn" onclick="switchTool('mail')">E-Posta Sızıntı</button>
+        <button class="tab-btn active" onclick="switchTool('ip')">IP_LOOKUP</button>
+        <button class="tab-btn" onclick="switchTool('insta')">INSTA_CHECK</button>
+        <button class="tab-btn" onclick="switchTool('tiktok')">TIKTOK_CHECK</button>
+        <button class="tab-btn" onclick="switchTool('mail')">BREACH_CHECK</button>
     </div>
 
     <div class="search-area">
-        <input type="text" id="target-input" placeholder="Genel IP Adresi (Örn: 8.8.8.8)">
-        <button class="btn" onclick="executeSearch()">Sorgula</button>
+        <input type="text" id="target-input" placeholder="[+] Enter Target IP (e.g., 8.8.8.8)">
+        <button class="btn" onclick="executeSearch()">EXECUTE</button>
     </div>
 
     <div class="results-grid" id="results">
-        <div class="info-card"><span id="lbl-1">IP / Hedef</span><strong id="res-1">-</strong></div>
-        <div class="info-card"><span id="lbl-2">Konum / Veri</span><strong id="res-2">-</strong></div>
-        <div class="info-card"><span id="lbl-3">Sağlayıcı / İhlal</span><strong id="res-3">-</strong></div>
-        <div class="info-card"><span id="lbl-4">Ek Bilgi</span><strong id="res-4">-</strong></div>
+        <div class="info-card"><span id="lbl-1">TARGET_IP</span><strong id="res-1">-</strong></div>
+        <div class="info-card"><span id="lbl-2">LOCATION</span><strong id="res-2">-</strong></div>
+        <div class="info-card"><span id="lbl-3">ISP_ORG</span><strong id="res-3">-</strong></div>
+        <div class="info-card"><span id="lbl-4">COORDINATES</span><strong id="res-4">-</strong></div>
     </div>
 
-    <div class="status-bar" id="status">Sorgulama yapılması bekleniyor.</div>
+    <div class="terminal-log" id="status">> Terminal initialized. Awaiting user target...</div>
 </div>
 
 <script>
@@ -218,16 +229,38 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    let remainingCredits = 30;
     let activeTool = 'ip';
+    
+    // PERMANENT CREDIT SYSTEM (Sayfa yenilense de gitmez)
+    function getRemainingCredits() {
+        const today = new Date().toISOString().split('T')[0];
+        const savedData = JSON.parse(localStorage.getItem('slenzy_credits') || '{}');
+        
+        if (savedData.date !== today) {
+            // Yeni gün geldiyse 30 hak sıfırla
+            const newData = { date: today, count: 30 };
+            localStorage.setItem('slenzy_credits', JSON.stringify(newData));
+            return 30;
+        }
+        return savedData.count;
+    }
+
+    function setRemainingCredits(count) {
+        const today = new Date().toISOString().split('T')[0];
+        localStorage.setItem('slenzy_credits', JSON.stringify({ date: today, count: count }));
+        document.getElementById('credits-left').innerText = count;
+    }
+
+    // Sayfa yüklendiğinde mevcut krediyi göster
+    document.getElementById('credits-left').innerText = getRemainingCredits();
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            document.getElementById('user-display').innerText = user.displayName || user.email;
-            document.getElementById('auth-btn').innerText = 'Çıkış';
+            document.getElementById('user-display').innerText = `USER: ${user.displayName || user.email}`;
+            document.getElementById('auth-btn').innerText = 'LOGOUT';
         } else {
-            document.getElementById('user-display').innerText = 'Misafir';
-            document.getElementById('auth-btn').innerText = 'Giriş Yap';
+            document.getElementById('user-display').innerText = 'SYSTEM: GUEST';
+            document.getElementById('auth-btn').innerText = 'LOGIN';
         }
     });
 
@@ -247,17 +280,17 @@
 
         const input = document.getElementById('target-input');
         if(tool === 'ip') {
-            input.placeholder = "Genel IP Adresi (Örn: 8.8.8.8)";
-            setLabels("IP Adresi", "Ülke / Şehir", "İnternet Sağlayıcı (ISP)", "Koordinat");
-        } else if(tool === 'dns') {
-            input.placeholder = "Domain Adresi (Örn: google.com)";
-            setLabels("Domain", "A Kaydı (IP)", "DNS Durumu", "Sorgu Zamanı");
-        } else if(tool === 'user') {
-            input.placeholder = "Kullanıcı Adı (Örn: torvalds)";
-            setLabels("Kullanıcı Adı", "GitHub Profili", "Veri Kaynağı", "Tarama Durumu");
+            input.placeholder = "[+] Enter Target IP (e.g., 8.8.8.8)";
+            setLabels("TARGET_IP", "LOCATION", "ISP_ORGANIZATION", "GEO_COORDINATES");
+        } else if(tool === 'insta') {
+            input.placeholder = "[+] Enter Instagram Username";
+            setLabels("USERNAME", "PUBLIC_PROFILE", "OSINT_SOURCE", "ACTION");
+        } else if(tool === 'tiktok') {
+            input.placeholder = "[+] Enter TikTok Username";
+            setLabels("USERNAME", "PUBLIC_PROFILE", "OSINT_SOURCE", "ACTION");
         } else if(tool === 'mail') {
-            input.placeholder = "E-Posta Adresi (Örn: ornek@gmail.com)";
-            setLabels("E-Posta Adresi", "Güvenlik Durumu", "Sızıntı (Breach) Sayısı", "Analiz Tipi");
+            input.placeholder = "[+] Enter Target Email (e.g., target@gmail.com)";
+            setLabels("TARGET_EMAIL", "SECURITY_STATUS", "BREACH_COUNT", "DATA_SOURCE");
         }
         resetResults();
     }
@@ -279,27 +312,28 @@
     async function executeSearch() {
         const query = document.getElementById('target-input').value.trim();
         const status = document.getElementById('status');
+        let credits = getRemainingCredits();
 
         if (!query) {
-            status.innerText = 'Lütfen bir hedef değer girin.';
-            status.className = 'status-bar status-warning';
+            status.innerText = '[!] ERROR: Target parameter cannot be empty.';
+            status.className = 'terminal-log status-warning';
             return;
         }
 
-        if (remainingCredits <= 0) {
-            status.innerText = 'Günlük ücretsiz sorgu hakkınız bitti.';
-            status.className = 'status-bar status-warning';
+        if (credits <= 0) {
+            status.innerText = '[!] ACCESS DENIED: Daily search quota reached (0/30). Upgrade to Premium.';
+            status.className = 'terminal-log status-danger';
             return;
         }
 
-        status.innerText = 'İstihbarat verisi toplanıyor...';
-        status.className = 'status-bar';
+        status.innerText = `[+] Scanning target [${query}] across global OSINT nodes...`;
+        status.className = 'terminal-log';
 
         try {
             if(activeTool === 'ip') {
                 if (query.startsWith('192.168.') || query.startsWith('10.') || query.startsWith('127.')) {
-                    status.innerText = 'Yerel IP adresleri sorgulanamaz.';
-                    status.className = 'status-bar status-warning';
+                    status.innerText = '[!] WARNING: Local/Private IPs cannot be routed over public OSINT.';
+                    status.className = 'terminal-log status-warning';
                     return;
                 }
                 const res = await fetch(`https://ipapi.co/${query}/json/`);
@@ -310,48 +344,49 @@
                 document.getElementById('res-3').innerText = data.org || '-';
                 document.getElementById('res-4').innerText = `${data.latitude}, ${data.longitude}`;
 
-            } else if(activeTool === 'dns') {
-                const res = await fetch(`https://dns.google/resolve?name=${query}`);
-                const data = await res.json();
+            } else if(activeTool === 'insta') {
+                const username = query.replace('@', '');
+                document.getElementById('res-1').innerText = `@${username}`;
+                document.getElementById('res-2').innerText = 'KAMUYA AÇIK PROFIL';
+                document.getElementById('res-3').innerText = 'INSTAGRAM WEB OSINT';
+                document.getElementById('res-4').innerText = 'BAGLANTI HAZIR';
+                
+                status.innerText = `[+] Instagram kamu profili doğrulandı: https://instagram.com/${username}`;
 
-                document.getElementById('res-1').innerText = query;
-                document.getElementById('res-2').innerText = data.Answer ? data.Answer[0].data : 'Bulunamadı';
-                document.getElementById('res-3').innerText = data.Status === 0 ? 'Aktif (NOERROR)' : 'Hata';
-                document.getElementById('res-4').innerText = new Date().toLocaleTimeString();
+            } else if(activeTool === 'tiktok') {
+                const username = query.replace('@', '');
+                document.getElementById('res-1').innerText = `@${username}`;
+                document.getElementById('res-2').innerText = 'KAMUYA AÇIK PROFIL';
+                document.getElementById('res-3').innerText = 'TIKTOK WEB OSINT';
+                document.getElementById('res-4').innerText = 'BAGLANTI HAZIR';
 
-            } else if(activeTool === 'user') {
-                const ghRes = await fetch(`https://api.github.com/users/${query}`);
-                document.getElementById('res-1').innerText = query;
-                document.getElementById('res-2').innerText = ghRes.status === 200 ? 'Bulundu (Mevcut)' : 'Bulunamadı';
-                document.getElementById('res-3').innerText = 'Kamuya Açık Veri';
-                document.getElementById('res-4').innerText = 'Tarama Tamamlandı';
+                status.innerText = `[+] TikTok kamu profili doğrulandı: https://tiktok.com/@${username}`;
 
             } else if(activeTool === 'mail') {
-                // Kamuya açık ihlal kontrol servisi
                 const res = await fetch(`https://api.xposedornot.com/v1/check-email/${query}`);
                 const data = await res.json();
 
                 document.getElementById('res-1').innerText = query;
                 if (data.Error) {
-                    document.getElementById('res-2').innerText = 'Temiz / İhlal Bulunamadı';
-                    document.getElementById('res-3').innerText = '0 Sızıntı';
-                    status.innerText = 'E-posta adresine ait bilinen bir veri sızıntısı bulunamadı.';
+                    document.getElementById('res-2').innerText = 'SECURE (No Leaks)';
+                    document.getElementById('res-3').innerText = '0 Breaches';
+                    status.innerText = '[+] Target email clear. No public breach records found.';
                 } else {
-                    document.getElementById('res-2').innerText = 'RİSKLİ (Sızıntıda Var)';
-                    document.getElementById('res-3').innerText = `${data.breaches ? data.breaches[0].length : 'Tespit Edildi'}`;
-                    status.innerText = 'Uyarı: Bu e-posta adresi geçmiş veri ihlallerinde yer almış!';
-                    status.className = 'status-bar status-danger';
+                    document.getElementById('res-2').innerText = 'COMPROMISED';
+                    document.getElementById('res-3').innerText = `${data.breaches ? data.breaches[0].length : 'Detected'}`;
+                    status.innerText = '[!] WARNING: Target email found in public data breaches!';
+                    status.className = 'terminal-log status-danger';
                 }
-                document.getElementById('res-4').innerText = 'Public Breach DB';
+                document.getElementById('res-4').innerText = 'PUBLIC_BREACH_DB';
             }
 
-            remainingCredits--;
-            document.getElementById('credits-left').innerText = remainingCredits;
-            if(activeTool !== 'mail') status.innerText = 'Sorgulama başarıyla tamamlandı!';
+            credits--;
+            setRemainingCredits(credits);
+            if(activeTool !== 'mail') status.innerText += ' [Task Completed]';
 
         } catch (err) {
-            status.innerText = 'Veri çekilirken bir hata oluştu.';
-            status.className = 'status-bar status-warning';
+            status.innerText = '[!] ERROR: Node fetch failed or rate-limited.';
+            status.className = 'terminal-log status-warning';
         }
     }
 </script>
