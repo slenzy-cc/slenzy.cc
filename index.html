@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLENZY // OSINT TERMINAL v2.0</title>
+    <title>SLENZY // OSINT TERMINAL v3.0</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -32,7 +32,7 @@
 
         .app-container {
             width: 100%;
-            max-width: 850px;
+            max-width: 900px;
             border: 1px solid var(--border);
             padding: 20px;
             box-shadow: 0 0 15px rgba(0, 255, 102, 0.1);
@@ -97,7 +97,7 @@
 
         .tab-btn {
             flex: 1;
-            min-width: 110px;
+            min-width: 120px;
             padding: 10px;
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -169,7 +169,8 @@
             padding: 12px;
             font-size: 0.8rem;
             color: var(--text);
-            min-height: 50px;
+            min-height: 60px;
+            white-space: pre-wrap;
         }
 
         .status-warning { color: var(--warning); }
@@ -193,12 +194,12 @@
         <span class="limit-count"><span id="credits-left">30</span> / 30</span>
     </div>
 
-    <!-- Araç Sekmeleri -->
+    <!-- Profesyonel Araç Sekmeleri -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTool('ip')">IP_LOOKUP</button>
-        <button class="tab-btn" onclick="switchTool('insta')">INSTA_CHECK</button>
-        <button class="tab-btn" onclick="switchTool('tiktok')">TIKTOK_CHECK</button>
-        <button class="tab-btn" onclick="switchTool('mail')">BREACH_CHECK</button>
+        <button class="tab-btn active" onclick="switchTool('ip')">IP_INTEL</button>
+        <button class="tab-btn" onclick="switchTool('shodan')">PORT_SCAN</button>
+        <button class="tab-btn" onclick="switchTool('subdomain')">SUBDOMAINS</button>
+        <button class="tab-btn" onclick="switchTool('mail')">BREACH_REPORT</button>
     </div>
 
     <div class="search-area">
@@ -231,13 +232,12 @@
 
     let activeTool = 'ip';
     
-    // PERMANENT CREDIT SYSTEM (Sayfa yenilense de gitmez)
+    // Kredi Yönetimi (Sıfırlanmaya karşı LocalStorage Korumalı)
     function getRemainingCredits() {
         const today = new Date().toISOString().split('T')[0];
         const savedData = JSON.parse(localStorage.getItem('slenzy_credits') || '{}');
         
         if (savedData.date !== today) {
-            // Yeni gün geldiyse 30 hak sıfırla
             const newData = { date: today, count: 30 };
             localStorage.setItem('slenzy_credits', JSON.stringify(newData));
             return 30;
@@ -251,7 +251,6 @@
         document.getElementById('credits-left').innerText = count;
     }
 
-    // Sayfa yüklendiğinde mevcut krediyi göster
     document.getElementById('credits-left').innerText = getRemainingCredits();
 
     auth.onAuthStateChanged(user => {
@@ -282,15 +281,15 @@
         if(tool === 'ip') {
             input.placeholder = "[+] Enter Target IP (e.g., 8.8.8.8)";
             setLabels("TARGET_IP", "LOCATION", "ISP_ORGANIZATION", "GEO_COORDINATES");
-        } else if(tool === 'insta') {
-            input.placeholder = "[+] Enter Instagram Username";
-            setLabels("USERNAME", "PUBLIC_PROFILE", "OSINT_SOURCE", "ACTION");
-        } else if(tool === 'tiktok') {
-            input.placeholder = "[+] Enter TikTok Username";
-            setLabels("USERNAME", "PUBLIC_PROFILE", "OSINT_SOURCE", "ACTION");
+        } else if(tool === 'shodan') {
+            input.placeholder = "[+] Enter Target IP for Open Ports Scan";
+            setLabels("TARGET_IP", "OPEN_PORTS", "HOSTNAMES", "SCAN_STATUS");
+        } else if(tool === 'subdomain') {
+            input.placeholder = "[+] Enter Domain (e.g., target.com)";
+            setLabels("TARGET_DOMAIN", "FOUND_SUBDOMAINS", "MAP_TYPE", "ANALYSIS_STATUS");
         } else if(tool === 'mail') {
             input.placeholder = "[+] Enter Target Email (e.g., target@gmail.com)";
-            setLabels("TARGET_EMAIL", "SECURITY_STATUS", "BREACH_COUNT", "DATA_SOURCE");
+            setLabels("TARGET_EMAIL", "SECURITY_STATUS", "BREACH_COUNT", "EXPOSED_SOURCES");
         }
         resetResults();
     }
@@ -321,12 +320,12 @@
         }
 
         if (credits <= 0) {
-            status.innerText = '[!] ACCESS DENIED: Daily search quota reached (0/30). Upgrade to Premium.';
+            status.innerText = '[!] ACCESS DENIED: Daily search quota reached (0/30). Upgrade to Premium for unlimited scans.';
             status.className = 'terminal-log status-danger';
             return;
         }
 
-        status.innerText = `[+] Scanning target [${query}] across global OSINT nodes...`;
+        status.innerText = `[+] Scanning target [${query}] across OSINT nodes...`;
         status.className = 'terminal-log';
 
         try {
@@ -343,26 +342,41 @@
                 document.getElementById('res-2').innerText = `${data.city || ''}, ${data.country_name || '-'}`;
                 document.getElementById('res-3').innerText = data.org || '-';
                 document.getElementById('res-4').innerText = `${data.latitude}, ${data.longitude}`;
+                status.innerText = `[+] IP Location Intel fetched successfully.`;
 
-            } else if(activeTool === 'insta') {
-                const username = query.replace('@', '');
-                document.getElementById('res-1').innerText = `@${username}`;
-                document.getElementById('res-2').innerText = 'KAMUYA AÇIK PROFIL';
-                document.getElementById('res-3').innerText = 'INSTAGRAM WEB OSINT';
-                document.getElementById('res-4').innerText = 'BAGLANTI HAZIR';
-                
-                status.innerText = `[+] Instagram kamu profili doğrulandı: https://instagram.com/${username}`;
+            } else if(activeTool === 'shodan') {
+                // Kamuya açık InternetDB Port Tarayıcısı
+                const res = await fetch(`https://internetdb.shodan.io/${query}`);
+                const data = await res.json();
 
-            } else if(activeTool === 'tiktok') {
-                const username = query.replace('@', '');
-                document.getElementById('res-1').innerText = `@${username}`;
-                document.getElementById('res-2').innerText = 'KAMUYA AÇIK PROFIL';
-                document.getElementById('res-3').innerText = 'TIKTOK WEB OSINT';
-                document.getElementById('res-4').innerText = 'BAGLANTI HAZIR';
+                document.getElementById('res-1').innerText = query;
+                document.getElementById('res-2').innerText = data.ports ? data.ports.join(', ') : 'No Open Ports';
+                document.getElementById('res-3').innerText = data.hostnames ? data.hostnames.join(', ') : 'None';
+                document.getElementById('res-4').innerText = 'SHODAN_NODE_ACTIVE';
 
-                status.innerText = `[+] TikTok kamu profili doğrulandı: https://tiktok.com/@${username}`;
+                if(data.ports && data.ports.length > 0) {
+                    status.innerText = `[!] CRITICAL: Target has ${data.ports.length} open internet ports: ${data.ports.join(', ')}`;
+                } else {
+                    status.innerText = `[+] Target ports secure. No open public service found.`;
+                }
+
+            } else if(activeTool === 'subdomain') {
+                // CRT.sh ile Alt Domain/Subdomain Tespiti
+                const cleanDomain = query.replace('https://', '').replace('http://', '').split('/')[0];
+                const res = await fetch(`https://crt.sh/?q=%.${cleanDomain}&output=json`);
+                const data = await res.json();
+
+                const subdomains = [...new Set(data.map(item => item.name_value))].slice(0, 5);
+
+                document.getElementById('res-1').innerText = cleanDomain;
+                document.getElementById('res-2').innerText = subdomains.length > 0 ? `${subdomains.length} Subdomains Found` : 'None Found';
+                document.getElementById('res-3').innerText = 'SSL Certificate Logs';
+                document.getElementById('res-4').innerText = 'DEEP_MAP_COMPLETED';
+
+                status.innerText = `[+] Subdomain Mapping Results:\n` + (subdomains.join('\n') || 'No subdomains detected.');
 
             } else if(activeTool === 'mail') {
+                // Detaylı Veri Sızıntı Taraması
                 const res = await fetch(`https://api.xposedornot.com/v1/check-email/${query}`);
                 const data = await res.json();
 
@@ -370,22 +384,23 @@
                 if (data.Error) {
                     document.getElementById('res-2').innerText = 'SECURE (No Leaks)';
                     document.getElementById('res-3').innerText = '0 Breaches';
+                    document.getElementById('res-4').innerText = 'PUBLIC_BREACH_DB';
                     status.innerText = '[+] Target email clear. No public breach records found.';
                 } else {
+                    const breachList = data.breaches && data.breaches[0] ? data.breaches[0].join(', ') : 'Detected';
                     document.getElementById('res-2').innerText = 'COMPROMISED';
-                    document.getElementById('res-3').innerText = `${data.breaches ? data.breaches[0].length : 'Detected'}`;
-                    status.innerText = '[!] WARNING: Target email found in public data breaches!';
+                    document.getElementById('res-3').innerText = `${data.breaches ? data.breaches[0].length : '1+'} Leak(s)`;
+                    document.getElementById('res-4').innerText = 'PUBLIC_BREACH_DB';
+                    status.innerText = `[!] WARNING: Email leaked in data breaches!\n[+] Exposed Platforms: ${breachList}`;
                     status.className = 'terminal-log status-danger';
                 }
-                document.getElementById('res-4').innerText = 'PUBLIC_BREACH_DB';
             }
 
             credits--;
             setRemainingCredits(credits);
-            if(activeTool !== 'mail') status.innerText += ' [Task Completed]';
 
         } catch (err) {
-            status.innerText = '[!] ERROR: Node fetch failed or rate-limited.';
+            status.innerText = '[!] ERROR: Node fetch failed or rate-limited. Check target parameter.';
             status.className = 'terminal-log status-warning';
         }
     }
