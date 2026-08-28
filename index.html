@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slenzy OSINT</title>
+    <title>Slenzy OSINT Platform</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -15,6 +15,7 @@
             --text: #e6edf3;
             --accent: #00ff66;
             --border: #1f2937;
+            --warning: #f59e0b;
         }
 
         body {
@@ -62,6 +63,23 @@
         .btn:hover {
             background: var(--accent);
             color: #000;
+        }
+
+        .limit-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .limit-count {
+            color: var(--accent);
+            font-weight: bold;
         }
 
         .search-area {
@@ -116,6 +134,10 @@
             color: #8b949e;
             text-align: center;
         }
+
+        .status-warning {
+            color: var(--warning);
+        }
     </style>
 </head>
 <body>
@@ -129,8 +151,14 @@
         </div>
     </header>
 
+    <!-- Kalan Hak Göstergesi -->
+    <div class="limit-box">
+        <span>Günlük Ücretsiz Sorgu Hakkı:</span>
+        <span class="limit-count"><span id="credits-left">30</span> / 30</span>
+    </div>
+
     <div class="search-area">
-        <input type="text" id="target-ip" placeholder="IP Adresi girin (Örn: 8.8.8.8)">
+        <input type="text" id="target-ip" placeholder="Genel IP Adresi (Örn: 8.8.8.8)">
         <button class="btn" onclick="lookupIP()">Sorgula</button>
     </div>
 
@@ -141,11 +169,11 @@
         <div class="info-card"><span>Koordinat</span><strong id="res-coords">-</strong></div>
     </div>
 
-    <div class="status-bar" id="status">Sorgulama yapılması bekleniyor.</div>
+    <div class="status-bar" id="status">Test etmek için genel bir IP (Örn: 8.8.8.8) yazabilirsiniz.</div>
 </div>
 
 <script>
-    // Firebase Konfigürasyonun
+    // Firebase Konfigürasyonu
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -158,7 +186,8 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Oturum Durumu
+    let remainingCredits = 30;
+
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('user-display').innerText = user.displayName || user.email;
@@ -178,36 +207,56 @@
         }
     }
 
-    // Basitleştirilmiş IP Sorgu
     async function lookupIP() {
         const ip = document.getElementById('target-ip').value.trim();
         const status = document.getElementById('status');
 
         if (!ip) {
-            status.innerText = 'Lütfen geçerli bir IP girin.';
+            status.innerText = 'Lütfen bir IP adresi girin.';
+            status.className = 'status-bar status-warning';
+            return;
+        }
+
+        // 192, 10 veya 172.16 ile başlayan yerel ağ IP kontrolleri
+        if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('127.')) {
+            status.innerText = 'Uyarı: Yerel (Özel) IP adresleri sorgulanamaz. Lütfen harici bir genel IP girin (Örn: 8.8.8.8).';
+            status.className = 'status-bar status-warning';
+            return;
+        }
+
+        if (remainingCredits <= 0) {
+            status.innerText = 'Günlük sorgu hakkınız doldu. Devam etmek için Premium üye olun.';
+            status.className = 'status-bar status-warning';
             return;
         }
 
         status.innerText = 'Veriler çekiliyor...';
+        status.className = 'status-bar';
 
         try {
             const res = await fetch(`https://ipapi.co/${ip}/json/`);
             const data = await res.json();
 
             if (data.error) {
-                status.innerText = 'Hata: Geçersiz IP adresi.';
+                status.innerText = 'Hata: Geçersiz veya sorgulanamayan IP adresi.';
+                status.className = 'status-bar status-warning';
                 return;
             }
 
-            // Temiz Veri Basımı
+            // Sonuçları Ekrala Bas
             document.getElementById('res-ip').innerText = data.ip || '-';
             document.getElementById('res-location').innerText = `${data.city || ''}, ${data.country_name || '-'}`;
             document.getElementById('res-isp').innerText = data.org || '-';
             document.getElementById('res-coords').innerText = `${data.latitude}, ${data.longitude}`;
 
+            // Krediyi Düşür
+            remainingCredits--;
+            document.getElementById('credits-left').innerText = remainingCredits;
+
             status.innerText = 'Sorgulama başarılı!';
         } catch (err) {
-            status.innerText = 'Veri alınırken hata oluştu.';
+            status.innerText = 'Veri alınırken bir hata oluştu.';
+            status.className = 'status-bar status-warning';
         }
     }
 </script>
