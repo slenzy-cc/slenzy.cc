@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLENZY // OSINT DASHBOARD v5.0</title>
+    <title>SLENZY // OSINT DASHBOARD v6.0 (ADMIN)</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -76,16 +76,6 @@
             gap: 10px;
         }
 
-        .logo::before {
-            content: '';
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            background: var(--sari-bright);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--sari-bright);
-        }
-
         .header-btns {
             display: flex;
             gap: 12px;
@@ -114,18 +104,19 @@
             transform: translateY(-2px);
         }
 
+        .btn-admin {
+            background: linear-gradient(135deg, #ef4444, #991b1b);
+            color: #fff;
+            border: none;
+            display: none; /* Sadece Admin Giriş Yapınca Görünür */
+        }
+
         .btn-vip {
             background: linear-gradient(135deg, #fbc02d, #f59e0b);
             color: #000;
             border: none;
         }
 
-        .btn-vip:hover {
-            background: linear-gradient(135deg, #ffeb3b, #fbc02d);
-            box-shadow: 0 0 20px rgba(251, 192, 45, 0.8);
-        }
-
-        /* ANA PANELLERİ DOLDURAN LAYOUT */
         .dashboard-grid {
             flex: 1;
             display: grid;
@@ -197,12 +188,6 @@
             transition: 0.3s;
         }
 
-        input:focus {
-            box-shadow: 0 0 12px rgba(251, 192, 45, 0.4);
-            border-color: var(--sari-bright);
-        }
-
-        /* KARTLARIN EKRANI DOLDURMASI */
         .results-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -219,11 +204,6 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            transition: 0.3s;
-        }
-
-        .info-card:hover {
-            border-color: var(--sari);
         }
 
         .info-card span {
@@ -231,7 +211,6 @@
             color: var(--sari);
             margin-bottom: 8px;
             font-weight: 700;
-            letter-spacing: 1px;
         }
 
         .info-card strong {
@@ -254,18 +233,18 @@
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
 
-        /* SAĞ GENİŞ AÇILIR PANEL */
+        /* MODAL & PANEL STİLLERİ */
         .sidebar {
             position: fixed;
             top: 0;
-            right: -400px;
-            width: 400px;
+            right: -450px;
+            width: 450px;
             height: 100%;
-            background: rgba(3, 10, 28, 0.95);
+            background: rgba(3, 10, 28, 0.98);
             backdrop-filter: blur(15px);
             border-left: 2px solid var(--sari);
             box-shadow: -10px 0 30px rgba(0,0,0,0.9);
-            transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+            transition: 0.4s ease;
             padding: 25px;
             z-index: 1000;
             display: flex;
@@ -274,9 +253,7 @@
             overflow-y: auto;
         }
 
-        .sidebar.open {
-            right: 0;
-        }
+        .sidebar.open { right: 0; }
 
         .sidebar-header {
             display: flex;
@@ -295,47 +272,28 @@
             cursor: pointer;
         }
 
-        .sidebar-section {
-            margin-bottom: 22px;
+        .user-row {
             background: var(--lacivert-light);
-            padding: 15px;
-            border-radius: 8px;
             border: 1px solid var(--border);
-        }
-
-        .sidebar-section h4 {
-            color: var(--sari);
+            padding: 10px;
             margin-bottom: 10px;
-            font-size: 1rem;
-            border-left: 4px solid var(--sari);
-            padding-left: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
         }
 
-        .sidebar-section p, .sidebar-section li {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            line-height: 1.5;
-        }
-
-        .sidebar-section ul {
-            padding-left: 18px;
-        }
-
-        .vip-box {
-            background: linear-gradient(145deg, rgba(251, 192, 45, 0.15), rgba(0, 31, 84, 0.4));
-            border: 1px solid var(--sari);
-        }
-
-        .vip-box h4 {
-            color: var(--sari-bright);
-        }
-
-        .price-tag {
-            font-size: 1.3rem;
-            color: var(--sari-bright);
+        .role-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
             font-weight: bold;
-            margin: 8px 0;
         }
+
+        .role-user { background: #3b82f6; color: #fff; }
+        .role-vip { background: #f59e0b; color: #000; }
+        .role-admin { background: #ef4444; color: #fff; }
 
         .status-warning { color: var(--warning); }
         .status-danger { color: var(--danger); }
@@ -351,17 +309,18 @@
 
 <div class="app-container">
     <header>
-        <div class="logo">SLENZY OSINT v5.0</div>
+        <div class="logo">SLENZY OSINT v6.0</div>
         <div class="header-btns">
-            <button class="btn btn-vip" onclick="toggleSidebar()">👑 VIP / PREMIUM</button>
+            <button class="btn btn-admin" id="admin-panel-btn" onclick="openAdminPanel()">🛠️ ADMİN PANELİ</button>
+            <button class="btn btn-vip" onclick="toggleSidebar('vip')">👑 VIP / PREMIUM</button>
             <button class="btn" onclick="toggleAuth()" id="auth-btn">GİRİŞ YAP</button>
-            <button class="btn" onclick="toggleSidebar()">MENÜ ☰</button>
+            <button class="btn" onclick="toggleSidebar('menu')">MENÜ ☰</button>
         </div>
     </header>
 
     <div class="dashboard-grid">
         <div class="limit-box">
-            <span>GÜNLÜK ÜCRETSİZ SORGULAMA HAKKI:</span>
+            <span>GÜNLÜK KALAN SORGULAMA HAKKI:</span>
             <span class="limit-count"><span id="credits-left">30</span> / 30</span>
         </div>
 
@@ -384,140 +343,203 @@
             <div class="info-card"><span id="lbl-4">HARİTA KONUMU</span><strong id="res-4">-</strong></div>
         </div>
 
-        <div class="terminal-log" id="status">> Sistem aktif. Sorgulama yapmak için yukarıdaki alana bir hedef girin...</div>
+        <div class="terminal-log" id="status">> Sistem aktif. Sorgulama yapmak için bir hedef parametre girin...</div>
     </div>
 </div>
 
-<!-- SAĞ PANEL -->
+<!-- SAĞ PANEL (MENÜ VE ADMİN İÇİN ORTAK) -->
 <div class="sidebar" id="sidebar">
     <div>
         <div class="sidebar-header">
-            <h3 style="color: var(--sari); margin: 0;">SİSTEM & VIP PANELİ</h3>
-            <button class="close-btn" onclick="toggleSidebar()">×</button>
+            <h3 style="color: var(--sari); margin: 0;" id="sidebar-title">SİSTEM PANELİ</h3>
+            <button class="close-btn" onclick="closeSidebar()">×</button>
         </div>
 
-        <div class="sidebar-section vip-box">
-            <h4>👑 VIP PREMIUM ÜYELİK</h4>
-            <p>Sınırsız sorgulama, API erişimi ve derinlemesine istihbarat raporlarına erişim sağlayın.</p>
-            <div class="price-tag">50 ₺ / Aylık</div>
-            <p style="font-size: 0.8rem; color: var(--sari);">Ödeme Yapmak İçin İletişime Geçin:</p>
-            <p style="font-size: 0.85rem; color: #fff; margin-top: 4px;"><strong>Papara / IBAN:</strong> TR00 0000 0000 0000 0000 0000 00</p>
-            <p style="font-size: 0.85rem; color: #fff;"><strong>Discord / İletişim:</strong> Meriç Ege C.</p>
-        </div>
-
-        <div class="sidebar-section">
-            <h4>KULLANICI BİLGİSİ</h4>
-            <p id="user-display">Durum: MİSAFİR KULLANICI</p>
-        </div>
-
-        <div class="sidebar-section">
-            <h4>KATKIDA BULUNANLAR</h4>
-            <ul>
-                <li><strong>Meriç Ege C.</strong> (Lead Dev & Architect)</li>
-                <li>SLENZY Security Lab</li>
-            </ul>
+        <div id="sidebar-content">
+            <!-- Dinamik İçerik Buraya Gelecek -->
         </div>
     </div>
 
     <div style="text-align: center; font-size: 0.75rem; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 10px;">
-        SLENZY OSINT v5.0 - Professional Security Platform
+        SLENZY OSINT v6.0 - Admin Integrated Platform
     </div>
 </div>
 
 <script>
+    // 🔴 BU KISMA KENDİ FIREBASE BİLGİLERİNİ YAPIŞTIRMALISIN
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
+  apiKey: "AIzaSyB-MAzC3_cPmBqytu5L4EMzmYGvxLFWBik",
+  authDomain: "slenzy-osint.firebaseapp.com",
+  projectId: "slenzy-osint",
+  storageBucket: "slenzy-osint.firebasestorage.app",
+  messagingSenderId: "422738373532",
+  appId: "1:422738373532:web:35f70c75a875917c413659",
+  measurementId: "G-S39DH7GZZC"
+};
+
+    // 🔴 KENDİ E-POSTA ADRESİNİ BURAYA YAZ (ADMİN YETKİSİ İÇİN)
+    const ADMIN_EMAIL = "mericegecan37@gmail.com"; 
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
+    let currentUserDoc = null;
     let activeTool = 'ip';
-    
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-    }
 
-    function getRemainingCredits() {
-        const today = new Date().toISOString().split('T')[0];
-        const savedData = JSON.parse(localStorage.getItem('slenzy_credits') || '{}');
-        
-        if (savedData.date !== today) {
-            const newData = { date: today, count: 30 };
-            localStorage.setItem('slenzy_credits', JSON.stringify(newData));
-            return 30;
-        }
-        return savedData.count;
-    }
-
-    function setRemainingCredits(count) {
-        const today = new Date().toISOString().split('T')[0];
-        localStorage.setItem('slenzy_credits', JSON.stringify({ date: today, count: count }));
-        document.getElementById('credits-left').innerText = count;
-    }
-
-    document.getElementById('credits-left').innerText = getRemainingCredits();
-
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async (user) => {
         if (user) {
-            document.getElementById('user-display').innerText = `Kullanıcı: ${user.displayName || user.email}`;
             document.getElementById('auth-btn').innerText = 'ÇIKIŞ YAP';
+            
+            // Kullanıcıyı Firestore Veritabanına Kaydet / Güncelle
+            const userRef = db.collection('users').doc(user.uid);
+            const doc = await userRef.get();
+
+            if (!doc.exists) {
+                const isOwner = user.email === ADMIN_EMAIL;
+                currentUserDoc = {
+                    email: user.email,
+                    name: user.displayName || 'İsimsiz Kullanıcı',
+                    role: isOwner ? 'admin' : 'user',
+                    createdAt: new Date().toISOString()
+                };
+                await userRef.set(currentUserDoc);
+            } else {
+                currentUserDoc = doc.data();
+            }
+
+            // Eğer Admin ise Admin Butonunu Göster
+            if (user.email === ADMIN_EMAIL || currentUserDoc.role === 'admin') {
+                document.getElementById('admin-panel-btn').style.display = 'flex';
+            }
+
+            // VIP / Admin Kullanıcılar için Hak Kontrolü
+            if (currentUserDoc.role === 'vip' || currentUserDoc.role === 'admin') {
+                document.getElementById('credits-left').innerText = "SINIRSIZ (VIP)";
+            }
+
         } else {
-            document.getElementById('user-display').innerText = 'Durum: MİSAFİR KULLANICI';
             document.getElementById('auth-btn').innerText = 'GİRİŞ YAP';
+            document.getElementById('admin-panel-btn').style.display = 'none';
+            currentUserDoc = null;
         }
     });
 
     function toggleAuth() {
         if (auth.currentUser) {
             auth.signOut();
+            location.reload();
         } else {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider);
         }
     }
 
+    function toggleSidebar(type) {
+        const sidebar = document.getElementById('sidebar');
+        const title = document.getElementById('sidebar-title');
+        const content = document.getElementById('sidebar-content');
+
+        if (type === 'vip') {
+            title.innerText = "👑 VIP PREMIUM PAKET";
+            content.innerHTML = `
+                <div style="background: var(--lacivert-light); padding:15px; border-radius:8px; border:1px solid var(--sari);">
+                    <h4 style="color:var(--sari-bright)">Sınırsız OSINT Erişimi</h4>
+                    <p style="font-size:0.9rem; color:var(--text-dim); margin:10px 0;">Sorgulama limitlerine takılmadan derinlemesine analiz yapın.</p>
+                    <div style="font-size:1.4rem; color:var(--sari-bright); font-weight:bold;">50 ₺ / Aylık</div>
+                    <p style="font-size:0.85rem; margin-top:15px;"><strong>IBAN:</strong> TR00 0000 0000 0000 0000 0000 00</p>
+                    <p style="font-size:0.85rem;"><strong>İletişim:</strong> Meriç Ege C.</p>
+                </div>`;
+        } else {
+            title.innerText = "SİSTEM PANELİ";
+            content.innerHTML = `
+                <div style="margin-bottom:15px;">
+                    <h4 style="color:var(--sari)">Geliştiriciler</h4>
+                    <p style="font-size:0.9rem;">Meriç Ege C. (Lead Architect)</p>
+                </div>`;
+        }
+
+        sidebar.classList.add('open');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+    }
+
+    // ADMİN PANELİ: GİRİŞ YAPAN TÜM KULLANICILARI LİSTELE VE ROL DEĞİŞTİR
+    async function openAdminPanel() {
+        const sidebar = document.getElementById('sidebar');
+        const title = document.getElementById('sidebar-title');
+        const content = document.getElementById('sidebar-content');
+
+        title.innerText = "🛠️ ADMİN YÖNETİM PANELİ";
+        content.innerHTML = `<p style="color:var(--sari)">Kullanıcı listesi yükleniyor...</p>`;
+        sidebar.classList.add('open');
+
+        try {
+            const snapshot = await db.collection('users').get();
+            let html = `<div style="margin-bottom:15px; font-size:0.85rem; color:var(--text-dim);">Sisteme Kayıtlı Toplam Kullanıcı: ${snapshot.size}</div>`;
+
+            snapshot.forEach(doc => {
+                const u = doc.data();
+                const uid = doc.id;
+                const badgeClass = u.role === 'admin' ? 'role-admin' : (u.role === 'vip' ? 'role-vip' : 'role-user');
+
+                html += `
+                    <div class="user-row">
+                        <div>
+                            <strong>${u.name || 'İsimsiz'}</strong><br>
+                            <span style="font-size:0.75rem; color:var(--text-dim);">${u.email}</span>
+                        </div>
+                        <div style="text-align:right;">
+                            <span class="role-badge ${badgeClass}">${u.role.toUpperCase()}</span><br>
+                            ${u.role !== 'admin' ? `
+                                <button onclick="changeUserRole('${uid}', '${u.role === 'vip' ? 'user' : 'vip'}')" 
+                                        style="margin-top:5px; background:var(--sari); color:#000; border:none; padding:3px 6px; font-size:0.7rem; font-weight:bold; cursor:pointer; border-radius:3px;">
+                                    ${u.role === 'vip' ? 'VIP İptal Et' : 'VIP Yap 👑'}
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            content.innerHTML = html;
+
+        } catch (err) {
+            content.innerHTML = `<p style="color:var(--danger)">Kullanıcılar çekilirken hata oluştu. Firestore yetkilerini kontrol edin.</p>`;
+        }
+    }
+
+    async function changeUserRole(uid, newRole) {
+        await db.collection('users').doc(uid).update({ role: newRole });
+        alert("Kullanıcı rolü güncellendi!");
+        openAdminPanel(); // Paneli yenile
+    }
+
+    // SORGULAMA KODLARI
+    function getRemainingCredits() {
+        if (currentUserDoc && (currentUserDoc.role === 'vip' || currentUserDoc.role === 'admin')) {
+            return 999;
+        }
+        const today = new Date().toISOString().split('T')[0];
+        const savedData = JSON.parse(localStorage.getItem('slenzy_credits') || '{}');
+        if (savedData.date !== today) {
+            localStorage.setItem('slenzy_credits', JSON.stringify({ date: today, count: 30 }));
+            return 30;
+        }
+        return savedData.count;
+    }
+
     function switchTool(tool) {
         activeTool = tool;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if (event && event.target) {
-            event.target.classList.add('active');
-        }
-
+        if (event && event.target) event.target.classList.add('active');
         const input = document.getElementById('target-input');
-        if(tool === 'ip') {
-            input.placeholder = "[+] IP Adresi Girin (Örn: 8.8.8.8)";
-            setLabels("HEDEF IP", "ŞEHİR / ÜLKE", "İNTERNET SAĞLAYICI", "HARİTA KONUMU");
-        } else if(tool === 'shodan') {
-            input.placeholder = "[+] Port Taraması İçin IP Girin";
-            setLabels("HEDEF IP", "AÇIK PORTLAR", "SUNUCU ISIMLERI", "TARAMA DURUMU");
-        } else if(tool === 'subdomain') {
-            input.placeholder = "[+] Web Sitesi Girin (Örn: hedefsite.com)";
-            setLabels("HEDEF SITE", "BULUNAN ALT SİTELER", "VERİ KAYNAĞI", "ANALİZ DURUMU");
-        } else if(tool === 'mail') {
-            input.placeholder = "[+] E-Posta Adresi Girin (Örn: ornek@gmail.com)";
-            setLabels("HEDEF E-POSTA", "GÜVENLİK DURUMU", "SIZINTI SAYISI", "VERİ KAYNAKLARI");
-        }
-        resetResults();
-    }
-
-    function setLabels(l1, l2, l3, l4) {
-        document.getElementById('lbl-1').innerText = l1;
-        document.getElementById('lbl-2').innerText = l2;
-        document.getElementById('lbl-3').innerText = l3;
-        document.getElementById('lbl-4').innerText = l4;
-    }
-
-    function resetResults() {
-        document.getElementById('res-1').innerText = '-';
-        document.getElementById('res-2').innerText = '-';
-        document.getElementById('res-3').innerText = '-';
-        document.getElementById('res-4').innerText = '-';
+        if(tool === 'ip') input.placeholder = "[+] IP Adresi Girin (Örn: 8.8.8.8)";
+        else if(tool === 'shodan') input.placeholder = "[+] Port Taraması İçin IP Girin";
+        else if(tool === 'subdomain') input.placeholder = "[+] Web Sitesi Girin (Örn: hedefsite.com)";
+        else if(tool === 'mail') input.placeholder = "[+] E-Posta Adresi Girin (Örn: ornek@gmail.com)";
     }
 
     async function executeSearch() {
@@ -532,85 +554,32 @@
         }
 
         if (credits <= 0) {
-            status.innerText = '[!] ERİŞİM ENGELENDİ: Günlük ücretsiz sorgulama hakkınız bitti (0/30). Sınırsız erişim için VIP Premium pakete geçin.';
+            status.innerText = '[!] ERİŞİM ENGELENDİ: Günlük 30 ücretsiz sorgu hakkınız bitti. VIP Pakete geçin.';
             status.className = 'terminal-log status-danger';
             return;
         }
 
-        status.innerText = `[+] [${query}] hedefi taranıyor, lütfen bekleyin...`;
-        status.className = 'terminal-log';
-
+        status.innerText = `[+] [${query}] taranıyor...`;
+        
         try {
             if(activeTool === 'ip') {
-                if (query.startsWith('192.168.') || query.startsWith('10.') || query.startsWith('127.')) {
-                    status.innerText = '[!] UYARI: Yerel (Local) IP adresleri kamuya açık taranamaz.';
-                    status.className = 'terminal-log status-warning';
-                    return;
-                }
                 const res = await fetch(`https://ipapi.co/${query}/json/`);
                 const data = await res.json();
-                
                 document.getElementById('res-1').innerText = data.ip || '-';
                 document.getElementById('res-2').innerText = `${data.city || ''}, ${data.country_name || '-'}`;
                 document.getElementById('res-3').innerText = data.org || '-';
                 document.getElementById('res-4').innerText = `${data.latitude}, ${data.longitude}`;
-                status.innerText = `[+] IP konum bilgileri başarıyla çekildi.`;
-
-            } else if(activeTool === 'shodan') {
-                const res = await fetch(`https://internetdb.shodan.io/${query}`);
-                const data = await res.json();
-
-                document.getElementById('res-1').innerText = query;
-                document.getElementById('res-2').innerText = data.ports ? data.ports.join(', ') : 'Açık Port Yok';
-                document.getElementById('res-3').innerText = data.hostnames ? data.hostnames.join(', ') : 'Yok';
-                document.getElementById('res-4').innerText = 'TAMAMLANDI';
-
-                if(data.ports && data.ports.length > 0) {
-                    status.innerText = `[!] TEHLİKE: Hedef sunucuda ${data.ports.length} adet açık internet portu tespit edildi: ${data.ports.join(', ')}`;
-                } else {
-                    status.innerText = `[+] Hedef portlar güvenli. Açık bir servis bulunamadı.`;
-                }
-
-            } else if(activeTool === 'subdomain') {
-                const cleanDomain = query.replace('https://', '').replace('http://', '').split('/')[0];
-                const res = await fetch(`https://crt.sh/?q=%.${cleanDomain}&output=json`);
-                const data = await res.json();
-
-                const subdomains = [...new Set(data.map(item => item.name_value))].slice(0, 5);
-
-                document.getElementById('res-1').innerText = cleanDomain;
-                document.getElementById('res-2').innerText = subdomains.length > 0 ? `${subdomains.length} Adet Bulundu` : 'Bulunamadı';
-                document.getElementById('res-3').innerText = 'SSL Sertifika Kayıtları';
-                document.getElementById('res-4').innerText = 'TAMAMLANDI';
-
-                status.innerText = `[+] Bulunan Alt Siteler:\n` + (subdomains.join('\n') || 'Alt site tespit edilemedi.');
-
-            } else if(activeTool === 'mail') {
-                const res = await fetch(`https://api.xposedornot.com/v1/check-email/${query}`);
-                const data = await res.json();
-
-                document.getElementById('res-1').innerText = query;
-                if (data.Error) {
-                    document.getElementById('res-2').innerText = 'GÜVENLİ (Sızıntı Yok)';
-                    document.getElementById('res-3').innerText = '0 Sızıntı';
-                    document.getElementById('res-4').innerText = 'VERİTABANI TEMİZ';
-                    status.innerText = '[+] E-posta adresi temiz. Bilinen bir veri sızıntısında bulunamadı.';
-                } else {
-                    const breachList = data.breaches && data.breaches[0] ? data.breaches[0].join(', ') : 'Sızıntı Var';
-                    document.getElementById('res-2').innerText = 'RİSKLİ (Sızdırılmış)';
-                    document.getElementById('res-3').innerText = `${data.breaches ? data.breaches[0].length : '1+'} Sızıntı`;
-                    document.getElementById('res-4').innerText = 'AÇIK VERİTABANI';
-                    status.innerText = `[!] UYARI: Bu e-posta adresi internete sızdırılmış!\n[+] Sızdırıldığı Platformlar: ${breachList}`;
-                    status.className = 'terminal-log status-danger';
-                }
+                status.innerText = `[+] IP Konum bilgisi başarıyla çekildi.`;
             }
-
-            credits--;
-            setRemainingCredits(credits);
-
-        } catch (err) {
-            status.innerText = '[!] HATA: Veri çekilemedi veya sunucu yanıt vermiyor. Lütfen sorguyu kontrol edin.';
-            status.className = 'terminal-log status-warning';
+            
+            if (!currentUserDoc || (currentUserDoc.role !== 'vip' && currentUserDoc.role !== 'admin')) {
+                credits--;
+                const today = new Date().toISOString().split('T')[0];
+                localStorage.setItem('slenzy_credits', JSON.stringify({ date: today, count: credits }));
+                document.getElementById('credits-left').innerText = credits;
+            }
+        } catch (e) {
+            status.innerText = '[!] HATA: Veri alınamadı.';
         }
     }
 </script>
