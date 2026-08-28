@@ -3,21 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLENZY // OSINT TERMINAL v3.0</title>
-    <!-- Firebase SDKs -->
+    <title>SLENZY // OSINT TERMINAL v4.0</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --bg: #030712;
-            --card-bg: #0b0f19;
-            --text: #00ff66;
-            --text-dim: #009933;
-            --accent: #00ff66;
-            --border: #132a13;
+            --card-bg: #0a1128;
+            --lacivert: #001f54;
+            --sari: #fbc02d;
+            --sari-bright: #ffeb3b;
+            --border: #1c3144;
+            --text: #e0e6ed;
+            --text-dim: #8d99ae;
             --warning: #f59e0b;
             --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -33,32 +38,34 @@
         .app-container {
             width: 100%;
             max-width: 900px;
-            border: 1px solid var(--border);
+            border: 2px solid var(--lacivert);
             padding: 20px;
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.1);
+            background-color: #02050e;
+            box-shadow: 0 0 20px rgba(251, 192, 45, 0.15);
+            position: relative;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px dashed var(--border);
+            border-bottom: 2px dashed var(--sari);
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
 
         .logo {
             font-weight: bold;
-            font-size: 1.3rem;
-            color: var(--accent);
+            font-size: 1.4rem;
+            color: var(--sari);
             letter-spacing: 2px;
-            text-shadow: 0 0 5px var(--accent);
+            text-shadow: 0 0 8px var(--sari);
         }
 
         .btn {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
+            background: var(--lacivert);
+            color: var(--sari);
+            border: 1px solid var(--sari);
             padding: 8px 16px;
             cursor: pointer;
             font-family: inherit;
@@ -67,25 +74,26 @@
         }
 
         .btn:hover {
-            background: var(--accent);
+            background: var(--sari);
             color: #000;
-            box-shadow: 0 0 10px var(--accent);
+            box-shadow: 0 0 12px var(--sari);
         }
 
         .limit-box {
             background: var(--card-bg);
-            border: 1px solid var(--border);
-            padding: 10px 15px;
+            border: 1px solid var(--sari);
+            padding: 12px 15px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .limit-count {
-            color: var(--accent);
+            color: var(--sari-bright);
             font-weight: bold;
+            font-size: 1.1rem;
         }
 
         .tabs {
@@ -97,8 +105,8 @@
 
         .tab-btn {
             flex: 1;
-            min-width: 120px;
-            padding: 10px;
+            min-width: 130px;
+            padding: 12px;
             background: var(--card-bg);
             border: 1px solid var(--border);
             color: var(--text-dim);
@@ -106,12 +114,14 @@
             font-family: inherit;
             font-weight: bold;
             transition: 0.2s;
+            text-align: center;
         }
 
         .tab-btn.active {
-            border-color: var(--accent);
-            color: var(--accent);
-            box-shadow: 0 0 8px rgba(0, 255, 102, 0.2);
+            border-color: var(--sari);
+            color: var(--sari-bright);
+            background: var(--lacivert);
+            box-shadow: 0 0 10px rgba(251, 192, 45, 0.3);
         }
 
         .search-area {
@@ -124,16 +134,15 @@
             flex: 1;
             padding: 12px;
             background: var(--card-bg);
-            border: 1px solid var(--border);
-            color: var(--accent);
+            border: 1px solid var(--sari);
+            color: var(--sari-bright);
             font-size: 0.95rem;
             font-family: inherit;
             outline: none;
         }
 
         input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 5px var(--accent);
+            box-shadow: 0 0 8px var(--sari);
         }
 
         .results-grid {
@@ -150,27 +159,89 @@
 
         .info-card span {
             display: block;
-            font-size: 0.75rem;
-            color: var(--text-dim);
+            font-size: 0.8rem;
+            color: var(--sari);
             margin-bottom: 5px;
-            text-transform: uppercase;
+            font-weight: bold;
         }
 
         .info-card strong {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--text);
             word-break: break-all;
         }
 
         .terminal-log {
             margin-top: 20px;
-            background: #000;
-            border: 1px solid var(--border);
+            background: #01040a;
+            border: 1px solid var(--sari);
             padding: 12px;
-            font-size: 0.8rem;
-            color: var(--text);
-            min-height: 60px;
+            font-size: 0.85rem;
+            color: var(--sari-bright);
+            min-height: 70px;
             white-space: pre-wrap;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 320px;
+            height: 100%;
+            background-color: #030a1c;
+            border-left: 2px solid var(--sari);
+            box-shadow: -5px 0 25px rgba(0,0,0,0.8);
+            transition: 0.3s ease;
+            padding: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--sari);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--sari);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section h4 {
+            color: var(--sari);
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            border-left: 3px solid var(--sari);
+            padding-left: 8px;
+        }
+
+        .sidebar-section p, .sidebar-section li {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        .sidebar-section ul {
+            padding-left: 20px;
+            margin: 0;
         }
 
         .status-warning { color: var(--warning); }
@@ -181,40 +252,69 @@
 
 <div class="app-container">
     <header>
-        <div class="logo">>_ SLENZY_OSINT</div>
+        <div class="logo">>_ SLENZY OSINT</div>
         <div>
-            <span id="user-display" style="font-size: 0.8rem; margin-right: 10px; color: var(--text-dim);">SYSTEM: GUEST</span>
-            <button class="btn" onclick="toggleAuth()" id="auth-btn">LOGIN</button>
+            <button class="btn" onclick="toggleAuth()" id="auth-btn">GİRİŞ YAP</button>
+            <button class="btn" onclick="toggleSidebar()" style="margin-left: 8px;">MENÜ ☰</button>
         </div>
     </header>
 
-    <!-- Kalan Hak Göstergesi -->
     <div class="limit-box">
-        <span>DAILY CREDITS REMAINING:</span>
+        <span>GÜNLÜK KALAN SORGULAMA HAKKI:</span>
         <span class="limit-count"><span id="credits-left">30</span> / 30</span>
     </div>
 
-    <!-- Profesyonel Araç Sekmeleri -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTool('ip')">IP_INTEL</button>
-        <button class="tab-btn" onclick="switchTool('shodan')">PORT_SCAN</button>
-        <button class="tab-btn" onclick="switchTool('subdomain')">SUBDOMAINS</button>
-        <button class="tab-btn" onclick="switchTool('mail')">BREACH_REPORT</button>
+        <button class="tab-btn active" onclick="switchTool('ip')">IP KONUMU</button>
+        <button class="tab-btn" onclick="switchTool('shodan')">AÇIK PORTLAR</button>
+        <button class="tab-btn" onclick="switchTool('subdomain')">ALT SİTELER</button>
+        <button class="tab-btn" onclick="switchTool('mail')">SIZI NTI KONTROLÜ</button>
     </div>
 
     <div class="search-area">
-        <input type="text" id="target-input" placeholder="[+] Enter Target IP (e.g., 8.8.8.8)">
-        <button class="btn" onclick="executeSearch()">EXECUTE</button>
+        <input type="text" id="target-input" placeholder="[+] IP Adresi Girin (Örn: 8.8.8.8)">
+        <button class="btn" onclick="executeSearch()">SORGULA</button>
     </div>
 
     <div class="results-grid" id="results">
-        <div class="info-card"><span id="lbl-1">TARGET_IP</span><strong id="res-1">-</strong></div>
-        <div class="info-card"><span id="lbl-2">LOCATION</span><strong id="res-2">-</strong></div>
-        <div class="info-card"><span id="lbl-3">ISP_ORG</span><strong id="res-3">-</strong></div>
-        <div class="info-card"><span id="lbl-4">COORDINATES</span><strong id="res-4">-</strong></div>
+        <div class="info-card"><span id="lbl-1">HEDEF IP</span><strong id="res-1">-</strong></div>
+        <div class="info-card"><span id="lbl-2">ŞEHİR / ÜLKE</span><strong id="res-2">-</strong></div>
+        <div class="info-card"><span id="lbl-3">İNTERNET SAĞLAYICI</span><strong id="res-3">-</strong></div>
+        <div class="info-card"><span id="lbl-4">HARİTA KONUMU</span><strong id="res-4">-</strong></div>
     </div>
 
-    <div class="terminal-log" id="status">> Terminal initialized. Awaiting user target...</div>
+    <div class="terminal-log" id="status">> Sistem hazır. Lütfen sorgulamak istediğiniz hedefi girin...</div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <div>
+        <div class="sidebar-header">
+            <h3 style="color: var(--sari); margin: 0;">SİSTEM PANELİ</h3>
+            <button class="close-btn" onclick="toggleSidebar()">×</button>
+        </div>
+
+        <div class="sidebar-section">
+            <h4>KULLANICI BİLGİSİ</h4>
+            <p id="user-display">Durum: MİSAFİR KULLANICI</p>
+        </div>
+
+        <div class="sidebar-section">
+            <h4>KATKIDA BULUNANLAR</h4>
+            <ul>
+                <li><strong>Meriç Ege C.</strong> (Baş Geliştirici & Tasarım)</li>
+                <li>SLENZY Security Team</li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <h4>SİSTEM HAKKINDA</h4>
+            <p>SLENZY OSINT, kamuya açık verileri tarayarak IP, Port ve Güvenlik sızıntı analizi sunan gelişmiş bir istihbarat aracıdır.</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; font-size: 0.75rem; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 10px;">
+        SLENZY OSINT v4.0 - Tüm Hakları Saklıdır.
+    </div>
 </div>
 
 <script>
@@ -232,7 +332,10 @@
 
     let activeTool = 'ip';
     
-    // Kredi Yönetimi (Sıfırlanmaya karşı LocalStorage Korumalı)
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+
     function getRemainingCredits() {
         const today = new Date().toISOString().split('T')[0];
         const savedData = JSON.parse(localStorage.getItem('slenzy_credits') || '{}');
@@ -255,11 +358,11 @@
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            document.getElementById('user-display').innerText = `USER: ${user.displayName || user.email}`;
-            document.getElementById('auth-btn').innerText = 'LOGOUT';
+            document.getElementById('user-display').innerText = `Kullanıcı: ${user.displayName || user.email}`;
+            document.getElementById('auth-btn').innerText = 'ÇIKIŞ YAP';
         } else {
-            document.getElementById('user-display').innerText = 'SYSTEM: GUEST';
-            document.getElementById('auth-btn').innerText = 'LOGIN';
+            document.getElementById('user-display').innerText = 'Durum: MİSAFİR KULLANICI';
+            document.getElementById('auth-btn').innerText = 'GİRİŞ YAP';
         }
     });
 
@@ -275,21 +378,23 @@
     function switchTool(tool) {
         activeTool = tool;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        if (event && event.target) {
+            event.target.classList.add('active');
+        }
 
         const input = document.getElementById('target-input');
         if(tool === 'ip') {
-            input.placeholder = "[+] Enter Target IP (e.g., 8.8.8.8)";
-            setLabels("TARGET_IP", "LOCATION", "ISP_ORGANIZATION", "GEO_COORDINATES");
+            input.placeholder = "[+] IP Adresi Girin (Örn: 8.8.8.8)";
+            setLabels("HEDEF IP", "ŞEHİR / ÜLKE", "İNTERNET SAĞLAYICI", "HARİTA KONUMU");
         } else if(tool === 'shodan') {
-            input.placeholder = "[+] Enter Target IP for Open Ports Scan";
-            setLabels("TARGET_IP", "OPEN_PORTS", "HOSTNAMES", "SCAN_STATUS");
+            input.placeholder = "[+] Port Taraması İçin IP Girin";
+            setLabels("HEDEF IP", "AÇIK PORTLAR", "SUNUCU ISIMLERI", "TARAMA DURUMU");
         } else if(tool === 'subdomain') {
-            input.placeholder = "[+] Enter Domain (e.g., target.com)";
-            setLabels("TARGET_DOMAIN", "FOUND_SUBDOMAINS", "MAP_TYPE", "ANALYSIS_STATUS");
+            input.placeholder = "[+] Web Sitesi Girin (Örn: hedefsite.com)";
+            setLabels("HEDEF SITE", "BULUNAN ALT SİTELER", "VERİ KAYNAĞI", "ANALİZ DURUMU");
         } else if(tool === 'mail') {
-            input.placeholder = "[+] Enter Target Email (e.g., target@gmail.com)";
-            setLabels("TARGET_EMAIL", "SECURITY_STATUS", "BREACH_COUNT", "EXPOSED_SOURCES");
+            input.placeholder = "[+] E-Posta Adresi Girin (Örn: ornek@gmail.com)";
+            setLabels("HEDEF E-POSTA", "GÜVENLİK DURUMU", "SIZI NTI SAYISI", "IZSIZ VERİ KAYNAKLARI");
         }
         resetResults();
     }
@@ -314,24 +419,24 @@
         let credits = getRemainingCredits();
 
         if (!query) {
-            status.innerText = '[!] ERROR: Target parameter cannot be empty.';
+            status.innerText = '[!] HATA: Lütfen sorgulamak istediğiniz hedefi boş bırakmayın.';
             status.className = 'terminal-log status-warning';
             return;
         }
 
         if (credits <= 0) {
-            status.innerText = '[!] ACCESS DENIED: Daily search quota reached (0/30). Upgrade to Premium for unlimited scans.';
+            status.innerText = '[!] ERİŞİM ENGELENDİ: Günlük ücretsiz sorgulama hakkınız bitti (0/30). Sınırsız erişim için Premium pakete geçin.';
             status.className = 'terminal-log status-danger';
             return;
         }
 
-        status.innerText = `[+] Scanning target [${query}] across OSINT nodes...`;
+        status.innerText = `[+] [${query}] hedefi taranıyor, lütfen bekleyin...`;
         status.className = 'terminal-log';
 
         try {
             if(activeTool === 'ip') {
                 if (query.startsWith('192.168.') || query.startsWith('10.') || query.startsWith('127.')) {
-                    status.innerText = '[!] WARNING: Local/Private IPs cannot be routed over public OSINT.';
+                    status.innerText = '[!] UYARI: Yerel (Local) IP adresleri kamuya açık taranamaz.';
                     status.className = 'terminal-log status-warning';
                     return;
                 }
@@ -342,26 +447,24 @@
                 document.getElementById('res-2').innerText = `${data.city || ''}, ${data.country_name || '-'}`;
                 document.getElementById('res-3').innerText = data.org || '-';
                 document.getElementById('res-4').innerText = `${data.latitude}, ${data.longitude}`;
-                status.innerText = `[+] IP Location Intel fetched successfully.`;
+                status.innerText = `[+] IP konum bilgileri başarıyla çekildi.`;
 
             } else if(activeTool === 'shodan') {
-                // Kamuya açık InternetDB Port Tarayıcısı
                 const res = await fetch(`https://internetdb.shodan.io/${query}`);
                 const data = await res.json();
 
                 document.getElementById('res-1').innerText = query;
-                document.getElementById('res-2').innerText = data.ports ? data.ports.join(', ') : 'No Open Ports';
-                document.getElementById('res-3').innerText = data.hostnames ? data.hostnames.join(', ') : 'None';
-                document.getElementById('res-4').innerText = 'SHODAN_NODE_ACTIVE';
+                document.getElementById('res-2').innerText = data.ports ? data.ports.join(', ') : 'Açık Port Yok';
+                document.getElementById('res-3').innerText = data.hostnames ? data.hostnames.join(', ') : 'Yok';
+                document.getElementById('res-4').innerText = 'TAMAMLANDI';
 
                 if(data.ports && data.ports.length > 0) {
-                    status.innerText = `[!] CRITICAL: Target has ${data.ports.length} open internet ports: ${data.ports.join(', ')}`;
+                    status.innerText = `[!] TEHLİKE: Hedef sunucuda ${data.ports.length} adet açık internet portu tespit edildi: ${data.ports.join(', ')}`;
                 } else {
-                    status.innerText = `[+] Target ports secure. No open public service found.`;
+                    status.innerText = `[+] Hedef portlar güvenli. Açık bir servis bulunamadı.`;
                 }
 
             } else if(activeTool === 'subdomain') {
-                // CRT.sh ile Alt Domain/Subdomain Tespiti
                 const cleanDomain = query.replace('https://', '').replace('http://', '').split('/')[0];
                 const res = await fetch(`https://crt.sh/?q=%.${cleanDomain}&output=json`);
                 const data = await res.json();
@@ -369,29 +472,28 @@
                 const subdomains = [...new Set(data.map(item => item.name_value))].slice(0, 5);
 
                 document.getElementById('res-1').innerText = cleanDomain;
-                document.getElementById('res-2').innerText = subdomains.length > 0 ? `${subdomains.length} Subdomains Found` : 'None Found';
-                document.getElementById('res-3').innerText = 'SSL Certificate Logs';
-                document.getElementById('res-4').innerText = 'DEEP_MAP_COMPLETED';
+                document.getElementById('res-2').innerText = subdomains.length > 0 ? `${subdomains.length} Adet Bulundu` : 'Bulunamadı';
+                document.getElementById('res-3').innerText = 'SSL Sertifika Kayıtları';
+                document.getElementById('res-4').innerText = 'TAMAMLANDI';
 
-                status.innerText = `[+] Subdomain Mapping Results:\n` + (subdomains.join('\n') || 'No subdomains detected.');
+                status.innerText = `[+] Bulunan Alt Siteler:\n` + (subdomains.join('\n') || 'Alt site tespit edilemedi.');
 
             } else if(activeTool === 'mail') {
-                // Detaylı Veri Sızıntı Taraması
                 const res = await fetch(`https://api.xposedornot.com/v1/check-email/${query}`);
                 const data = await res.json();
 
                 document.getElementById('res-1').innerText = query;
                 if (data.Error) {
-                    document.getElementById('res-2').innerText = 'SECURE (No Leaks)';
-                    document.getElementById('res-3').innerText = '0 Breaches';
-                    document.getElementById('res-4').innerText = 'PUBLIC_BREACH_DB';
-                    status.innerText = '[+] Target email clear. No public breach records found.';
+                    document.getElementById('res-2').innerText = 'GÜVENLİ (Sızıntı Yok)';
+                    document.getElementById('res-3').innerText = '0 Sızıntı';
+                    document.getElementById('res-4').innerText = 'VERİTABANI TEMİZ';
+                    status.innerText = '[+] E-posta adresi temiz. Bilinen bir veri sızıntısında bulunamadı.';
                 } else {
-                    const breachList = data.breaches && data.breaches[0] ? data.breaches[0].join(', ') : 'Detected';
-                    document.getElementById('res-2').innerText = 'COMPROMISED';
-                    document.getElementById('res-3').innerText = `${data.breaches ? data.breaches[0].length : '1+'} Leak(s)`;
-                    document.getElementById('res-4').innerText = 'PUBLIC_BREACH_DB';
-                    status.innerText = `[!] WARNING: Email leaked in data breaches!\n[+] Exposed Platforms: ${breachList}`;
+                    const breachList = data.breaches && data.breaches[0] ? data.breaches[0].join(', ') : 'Sızıntı Var';
+                    document.getElementById('res-2').innerText = 'RİSKLİ (Sızdırılmış)';
+                    document.getElementById('res-3').innerText = `${data.breaches ? data.breaches[0].length : '1+'} Sızıntı`;
+                    document.getElementById('res-4').innerText = 'AÇIK VERİTABANI';
+                    status.innerText = `[!] UYARI: Bu e-posta adresi internete sızdırılmış!\n[+] Sızdırıldığı Platformlar: ${breachList}`;
                     status.className = 'terminal-log status-danger';
                 }
             }
@@ -400,7 +502,7 @@
             setRemainingCredits(credits);
 
         } catch (err) {
-            status.innerText = '[!] ERROR: Node fetch failed or rate-limited. Check target parameter.';
+            status.innerText = '[!] HATA: Veri çekilemedi veya sunucu yanıt vermiyor. Lütfen sorguyu kontrol edin.';
             status.className = 'terminal-log status-warning';
         }
     }
